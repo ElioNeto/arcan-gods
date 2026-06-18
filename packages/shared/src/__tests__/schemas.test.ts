@@ -39,13 +39,18 @@ describe('RegisterSchema', () => {
 });
 
 describe('MoveSchema', () => {
-  it('should accept valid coordinates', () => {
-    const result = MoveSchema.safeParse({ x: 10, y: 20 });
+  it('should accept valid destination coordinates', () => {
+    const result = MoveSchema.safeParse({ destX: 100, destY: 200 });
     expect(result.success).toBe(true);
   });
 
   it('should reject negative coordinates', () => {
-    const result = MoveSchema.safeParse({ x: -1, y: 0 });
+    const result = MoveSchema.safeParse({ destX: -1, destY: 0 });
     expect(result.success).toBe(false);
+  });
+
+  it('should accept optional timestamp', () => {
+    const result = MoveSchema.safeParse({ destX: 100, destY: 200, timestamp: 1234567890 });
+    expect(result.success).toBe(true);
   });
 });

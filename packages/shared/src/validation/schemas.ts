@@ -12,8 +12,9 @@ export const RegisterSchema = z.object({
 });
 
 export const MoveSchema = z.object({
-  x: z.number().int().min(0).max(255),
-  y: z.number().int().min(0).max(255),
+  destX: z.number().int().min(0).max(4095),
+  destY: z.number().int().min(0).max(4095),
+  timestamp: z.number().int().optional(),
 });
 
 export const ChatSchema = z.object({
