@@ -4,8 +4,9 @@
 
 - Node.js 20+
 - npm 9+
-- Docker + Docker Compose (para PostgreSQL e Redis)
 - Git
+
+> **Nota:** PostgreSQL e Redis são necessários apenas quando a autenticação com banco for implementada (P1.1). No momento, o servidor roda em modo dev com auto-login.
 
 ## Primeiros passos
 
@@ -14,36 +15,45 @@
 git clone https://github.com/ElioNeto/arcan-gods.git
 cd arcan-gods
 
-# Instale dependências do root (workspaces)
+# Instale dependências (todos os workspaces: shared, server, client)
 npm install
 
 # Copie o arquivo de ambiente
 cp .env.example .env
 
-# Suba os serviços de infraestrutura
-docker compose up -d
-
-# Rode as migrações do banco
-npm run db:migrate
-
-# (Opcional) Popule com dados de seed
-npm run db:seed
-
 # Inicie servidor + cliente em modo dev
 npm run dev
 ```
 
-## Estrutura de Commands
+O servidor WebSocket sobe em `ws://localhost:3001`.
+O cliente Vite sobe em `http://localhost:5173`.
+
+Abra o navegador em `http://localhost:5173`, clique em **"Conectar"** e veja o jogo funcionando!
+
+## Estrutura de Comandos
 
 | Comando | Descrição |
 |---------|-----------|
-| `npm run dev` | Sobe servidor + cliente em paralelo |
-| `npm run build` | Build de produção |
+| `npm run dev` | Sobe servidor + cliente em paralelo (concurrently) |
+| `npm run build` | Build de produção (shared → server → client) |
 | `npm run lint` | ESLint em todos os pacotes |
-| `npm run test` | Vitest em todos os pacotes |
-| `npm run db:migrate` | Roda migrations pendentes |
-| `npm run db:seed` | Popula banco com dados iniciais |
-| `docker compose up` | Sobe PostgreSQL + Redis |
+| `npm run test` | Vitest em todos os pacotes (73 testes) |
+| `npm run test:watch` | Testes em modo watch |
+
+## Testes
+
+```bash
+# Executar todos os testes
+npm run test
+
+# Executar testes de um pacote específico
+npx vitest run packages/shared
+npx vitest run packages/server
+npx vitest run packages/client
+
+# Modo watch
+npm run test:watch
+```
 
 ## Variáveis de Ambiente
 
@@ -52,22 +62,24 @@ npm run dev
 SERVER_PORT=3000
 WS_PORT=3001
 
-# Database
+# Database (futuro — P1.1)
 DATABASE_URL=postgresql://arcan:arcan@localhost:5432/arcan_gods
 
-# Redis
+# Redis (futuro)
 REDIS_URL=redis://localhost:6379
 
-# Auth
+# Auth (futuro — P1.1)
 JWT_SECRET=your-secret-here
 JWT_EXPIRES_IN=2h
 
 # Game
-TICK_RATE=100
+TICK_RATE=100         # ms (10 Hz)
 MAX_PLAYERS_PER_MAP=100
 ```
 
-## Docker Compose (dev)
+## Docker Compose (futuro)
+
+> O Docker Compose com PostgreSQL + Redis será implementado no **Ciclo 02**. Até lá, o servidor funciona em modo standalone com auto-login.
 
 ```yaml
 services:
@@ -89,4 +101,24 @@ services:
 
 volumes:
   pgdata:
+```
+
+## Desenvolvimento
+
+### Estrutura de diretórios
+
+```
+packages/
+├── shared/   → npm run dev -w packages/shared   (build watch)
+├── server/   → npm run dev -w packages/server   (tsx watch)
+└── client/   → npm run dev -w packages/client   (vite)
+```
+
+### Debug
+
+O objeto global `__game` está disponível no console do navegador **apenas em desenvolvimento** (`import.meta.env.DEV`). Use para inspecionar estado do jogo.
+
+```javascript
+// No console do navegador (dev mode apenas)
+console.log(__game); // Instância da classe Game
 ```
