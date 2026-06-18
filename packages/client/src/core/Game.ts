@@ -3,8 +3,10 @@ import { NetworkManager } from './NetworkManager.js';
 import { InputManager } from './InputManager.js';
 import { Camera } from './Camera.js';
 import { AssetManager } from './AssetManager.js';
+import { TilemapRenderer } from '../maps/TilemapRenderer.js';
 import { MenuScreen } from '../ui/MenuScreen.js';
 import { PlaceholderGraphics } from '../ui/PlaceholderGraphics.js';
+import { MovementInterpolator } from '../systems/MovementInterpolator.js';
 
 export type GameState = 'loading' | 'menu' | 'world';
 
@@ -17,9 +19,11 @@ export class Game {
 
   private worldContainer: Container;
   private uiContainer: Container;
+  private tilemapRenderer: TilemapRenderer;
   private menuScreen: MenuScreen | null = null;
   private state: GameState = 'loading';
   private playerEntities: Map<string, Container> = new Map();
+  private movementInterpolator: MovementInterpolator = new MovementInterpolator();
 
   constructor() {
     this.app = new Application();
@@ -27,6 +31,7 @@ export class Game {
     this.inputManager = new InputManager();
     this.worldContainer = new Container();
     this.uiContainer = new Container();
+    this.tilemapRenderer = new TilemapRenderer(this.worldContainer);
     this.assetManager = new AssetManager();
     this.camera = new Camera(this.worldContainer, 1920, 1080);
   }
@@ -85,7 +90,25 @@ export class Game {
     });
 
     this.networkManager.on('PLAYER_MOVED', (packet: any) => {
-      this.updateEntityPosition(packet.id, packet.x, packet.y);
+      // If we have an active interpolation for this entity, let the interpolator handle it.
+      // Otherwise, snap directly to the position.
+      if (!this.movementInterpolator.hasEntity(packet.id)) {
+        this.updateEntityPosition(packet.id, packet.x, packet.y);
+      }
+    });
+
+    this.networkManager.on('PLAYER_PATH', (packet: any) => {
+      if (packet.path && packet.path.length > 0) {
+        this.movementInterpolator.startPath(packet.id, packet.path);
+      }
+    });
+
+    this.networkManager.on('MAP_DATA', (packet: any) => {
+      if (packet.map) {
+        this.tilemapRenderer.renderFromMapData(packet.map);
+      } else {
+        this.tilemapRenderer.renderCollisionGrid(packet.collisionGrid);
+      }
     });
   }
 
@@ -113,6 +136,9 @@ export class Game {
       this.menuScreen.destroy();
       this.menuScreen = null;
     }
+
+    // Request map data for the current map
+    this.networkManager.send({ type: 'REQUEST_MAP_DATA' });
 
     // Create local player
     const playerContainer = PlaceholderGraphics.createPlayer(
@@ -171,6 +197,18 @@ export class Game {
 
   private update(): void {
     if (this.state === 'world') {
+      const deltaSec = this.app.ticker.deltaMS / 1000;
+      this.movementInterpolator.update(deltaSec);
+
+      // Apply interpolated positions to entity containers
+      for (const [id, container] of this.playerEntities) {
+        const pos = this.movementInterpolator.getPosition(id);
+        if (pos) {
+          container.x = pos.x;
+          container.y = pos.y;
+        }
+      }
+
       this.camera.update();
     }
 
