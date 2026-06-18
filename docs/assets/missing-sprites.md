@@ -1,7 +1,7 @@
 # 🎯 Sprites Faltantes — Arcan Gods
 
-> **Data:** 2026-06-18  
-> **Status:** Inventário de lacunas visuais  
+> **Data:** 2026-06-18 (atualizado)  
+> **Status:** ✅ Muitas lacunas preenchidas! (2.900 PNGs totais)  
 > **Prioridades:** P0 (essencial) → P1 (importante) → P2 (futuro)
 
 ---
@@ -23,11 +23,11 @@
 
 | Classe | O que temos | O que falta | Prio |
 |--------|-------------|-------------|------|
-| **Dark Knight** | ✅ Biker, Samurai, Fighter | — | |
-| **Dark Wizard** | ⚠️ Converted (vampire) serve | 🔴 Capa de mago com cajado/cristal | **P0** |
-| **Elf** | ⚠️ Schoolgirl, Vampire Girl | 🔴 Arqueira com arco, armadura leve | **P0** |
-| **Summoner** | 🟡 Countess (vampire) | 🔴 Túnica de summoner com livro/orbe | **P0** |
-| **Magic Gladiator** | ✅ Cyborg | — | |
+| **Dark Knight** | ✅ Biker, Samurai, Fighter, Viking, Elf Warrior | — | |
+| **Dark Wizard** | ✅ Ice Wizard, Lightning Mage, Mage | — | |
+| **Elf** | ✅ Elf Archer (210 sprites), Elf Warrior | — | |
+| **Summoner** | ✅ Fairy (240 sprites), Dark Elf, Countess | — | |
+| **Magic Gladiator** | ✅ Cyborg, Viking | — | |
 
 **Total faltando:** 3 spritesheets de classe completos (DW, Elf, Summoner)
 
@@ -37,15 +37,15 @@
 |----------|--------|------------|
 | **Idle** (parado) | ✅ | Todos os personagens têm |
 | **Walk** (andar) | ✅ | Todos |
-| **Run** (correr) | ✅ | Cyberpunk, Shinobi, Vampire |
-| **Attack** (ataque) | ✅ | 2-4 variações por personagem |
-| **Skill Cast** (magia) | ❌ **FALTA** | Animação de conjurar magia |
+| **Run** (correr) | ✅ | Cyberpunk, Shinobi, Vampire, Wizard, Assassin |
+| **Attack** (ataque) | ✅ | Múltiplas variações por personagem |
+| **Skill Cast** (magia) | ✅ **NOVO** | Wizard Ice/Lightning têm animações de conjuração |
 | **Hurt** (dano) | ✅ | Todos |
 | **Death** (morrer) | ✅ | Todos |
 | **Shield/Block** (bloquear) | ⚠️ Só Shinobi | Falta para classes mágicas |
 | **Jump** (pular) | ✅ | Maioria |
 | **Climb** (escalar) | ✅ | Só Cyberpunk |
-| **Swim** (nadar) | ❌ **FALTA** | Para mapas aquáticos |
+| **Swim** (nadar) | ❌ **FALTA** | Para mapas aquáticos (Atlans) |
 | **Sit/Emote** (sentar) | ❌ **FALTA** | Para interação social |
 | **Victory** (comemorar) | ❌ **FALTA** | Level up, quest complete |
 | **Stun** (atordoado) | ❌ **FALTA** | Para status effects |
@@ -58,17 +58,17 @@
 
 | Skill | Tipo | O que falta | Prio |
 |-------|------|-------------|------|
-| **Energy Ball** (DW) | Projétil | 🔴 Esfera de energia azul | **P0** |
-| **Flame** (DW) | Projétil | 🔴 Bola de fogo | **P0** |
+| **Energy Ball** (DW) | Projétil | 🟡 Temos Light_ball do Lightning Mage | **P0** |
+| **Flame** (DW) | Projétil | 🟡 Temos Fire do Mage (assassin pack) | **P0** |
+| **Lightning** (DW) | Raio | 🟡 Temos Lightning Mage com charge/ball | **P0** |
+| **Ice Storm** (DW) | Área | 🟡 Temos Ice Wizard com animações de ataque | **P1** |
 | **Twisting Slash** (DK) | Slash | 🟡 Corte giratório | **P1** |
-| **Triple Shot** (Elf) | Projétil | 🟡 Flecha tripla | **P1** |
+| **Triple Shot** (Elf) | Projétil | ✅ Elfa arqueira tem ataque com arco | **P0** |
 | **Heal** (Elf) | Buff | 🟡 Efeito de cura verde | **P1** |
-| **Summon** (Summoner) | Evocação | 🔴 Círculo de invocação | **P0** |
-| **Meteorite** (DW) | Área | 🟡 Chuva de meteoros | **P1** |
-| **Ice Storm** (DW) | Área | 🟡 Tempestade de gelo | **P2** |
-| **Lightning** (DW) | Raio | 🟡 Raio do céu | **P1** |
-| **Buff skills** | Buff | 🟡 Auras genéricas (vermelha, azul, verde) | **P1** |
-| **Debuff skills** | Debuff | 🟡 Purple/roxo para curses | **P2** |
+| **Summon** (Summoner) | Evocação | ❌ **FALTA** — Círculo de invocação | **P0** |
+| **Meteorite** (DW) | Área | ❌ **FALTA** — Chuva de meteoros | **P1** |
+| **Buff skills** | Buff | ❌ **FALTA** — Auras genéricas | **P1** |
+| **Debuff skills** | Debuff | ❌ **FALTA** — Purple/roxo para curses | **P2** |
 
 ### 2.2 Efeitos Gerais
 
@@ -113,12 +113,15 @@
 
 | Elemento | O que falta | Prio |
 |----------|-------------|------|
-| 🔴 **Button** | Botão padrão (normal + hover + click) | **P0** |
-| 🔴 **Window Frame** | Moldura de janela arrastável | **P0** |
-| 🟡 **Close Button** | Botão fechar (X) | **P0** |
-| 🟡 **Scrollbar** | Barra de rolagem | **P1** |
+| ✅ **Button** | 🆕 Temos do Roguelike GUI pack (214 elementos) | **P0** |
+| ✅ **Window Frame** | 🆕 Temos do Roguelike GUI pack | **P0** |
+| ✅ **Avatars** | 🆕 50 avatares de personagem | **P0** |
+| ✅ **Skill Icons** | 🆕 50 ícones de skill Aeromancer | **P0** |
+| ✅ **Boot Icons** | 🆕 50 ícones de botas | **P0** |
+| 🟡 **HP/MP/XP Bars** | ❌ **FALTA** — Precisa de barras estilizadas | **P0** |
+| 🟡 **Close Button** | ❌ **FALTA** — Fazer a partir do GUI pack | **P0** |
+| 🟡 **Scrollbar** | ❌ **FALTA** | **P1** |
 | 🟢 **Tab** | Abas de navegação | **P1** |
-| 🟢 **Checkbox** | Caixa de seleção | **P2** |
 | 🟢 **Input Field** | Campo de texto | **P1** |
 
 ---

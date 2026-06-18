@@ -1,10 +1,10 @@
 # 📦 Catálogo de Assets — Arcan Gods
 
-> **Versão:** 1.0.0  
+> **Versão:** 2.0.0  
 > **Data:** 2026-06-18  
-> **Fonte:** CraftPix.net (15 pacotes)  
+> **Fonte:** CraftPix.net (27 pacotes)  
 > **Localização:** `client/public/assets/`  
-> **Total:** 1.131 PNGs (7.3 MB)
+> **Total:** 2.900 PNGs
 
 ---
 
@@ -12,11 +12,25 @@
 
 ```
 client/public/assets/
-├── characters/           → Personagens jogáveis (3 kits × 3 variações)
+├── characters/           → Personagens jogáveis (9 kits × múltiplas variações)
+│   ├── cyberpunk/        → 3 chars: biker, punk, cyborg
+│   ├── shinobi/          → 3 chars: shinobi, samurai, fighter
+│   ├── vampire/          → 3 chars: converted, countess, girl
+│   ├── elf/              → 🆕 Elfa arqueira (210 sprites)
+│   ├── wizard/           → 🆕 Mago de gelo + relâmpago (116 sprites)
+│   ├── fairy/            → 🆕 Fada mágica (240 sprites)
+│   ├── assassin/         → 🆕 Assassino/Mago/Viking (116 sprites)
+│   ├── elf-warrior/      → 🆕 Elfo guerreiro (627 sprites)
+│   └── dark-elf/         → 🆕 Elfo sombrio (96 sprites)
 ├── npcs/                 → NPCs interativos
 ├── monsters/             → Inimigos e criaturas (5 categorias)
-├── tilesets/             → Tilesets para mapas (2 temas completos)
-├── items/icons/          → Ícones de itens 32×32
+├── tilesets/             → Tilesets para mapas
+├── items/                → Ícones de itens
+├── ui/                   → 🆕 Interface do usuário
+│   ├── avatars/          → 🆕 Avatares de personagem (50)
+│   ├── boot-icons/       → 🆕 Ícones de botas (50)
+│   ├── skill-icons/      → 🆕 Ícones de habilidades (50)
+│   └── roguelike/        → 🆕 Elementos GUI (214)
 ├── vehicles/trucks/      → Peças de veículos
 ├── effects/graffiti/     → Decals e efeitos visuais
 ├── maps/                 → Mapas Tiled (futuro)
@@ -73,6 +87,81 @@ client/public/assets/
 | 🧛‍♀️ **Girl** | Idle, Walk, Run, Jump, Attack_1/2/3/4, Hurt, Dead |
 
 **Indicado para:** Dark Wizard (Converted), Elf/Summoner (Girl, Countess)
+
+---
+
+### 1.4 Elf Archer — 210 sprites 🆕
+
+**Sprite size:** Vários (SCML skeleton + PNG)  
+**Estilo:** Fantasia medieval — Elfa com arco  
+**Origem:** `craftpix-392011`
+
+| Variação | Animações |
+|----------|-----------|
+| Personagem 1, 2, 3 | Idle, Walk, Attack (arco), Hurt, Death + partes do corpo separadas (SCML) |
+
+**Indicado para:** **Classe Elf** — finalmente temos uma arqueira!
+
+### 1.5 Wizard — 2 variações, 116 sprites 🆕
+
+**Sprite size:** Frames individuais  
+**Estilo:** Fantasia — Mago de Gelo + Mago de Relâmpago  
+**Origem:** `craftpix-577002` (gelo) + `craftpix-529677` (relâmpago)
+
+| Variante | Animações |
+|----------|-----------|
+| 🧊 **Ice Wizard** | Idle, Walk, Run, Jump, Attack, Hurt, Die |
+| ⚡ **Lightning Mage** | Idle, Walk, Run, Jump, Attack_1, Charge, Light_ball, Light_charge, Hurt, Dead |
+
+**Indicado para:** **Classe Dark Wizard**
+
+### 1.6 Fairy — 240 sprites 🆕
+
+**Sprite size:** Vários (SCML skeleton + PNG)  
+**Estilo:** Fantasia — Fada com asas e magia  
+**Origem:** `craftpix-733001`
+
+**Indicado para:** Summoner, efeitos especiais, NPC
+
+### 1.7 Assassin/Mage/Viking — 3 heróis, 116 sprites 🆕
+
+**Sprite size:** Frames individuais  
+**Estilo:** Fantasia medieval  
+**Origem:** `craftpix-891165`
+
+| Classe | Animações |
+|--------|-----------|
+| 🗡️ **Assassin** | Idle, Walk, Attack, Hurt, Death |
+| 🔮 **Mage** | Idle, Walk, Attack (Fire), Hurt, Death |
+| 🪓 **Viking** | Idle, Walk, Attack, Hurt, Death |
+
+**Indicado para:** Dark Knight (Viking), Dark Wizard (Mage), classes ágeis (Assassin)
+
+### 1.8 Elf Warrior — 627 sprites 🆕
+
+**Sprite size:** Frames individuais  
+**Estilo:** Fantasia — Elfo guerreiro com espada  
+**Origem:** `craftpix-933170`
+
+| Variação | Animações |
+|----------|-----------|
+| Elves 1-8 | idle, walk, attack, hurt, death (múltiplos frames cada) |
+
+**Indicado para:** Dark Knight, Magic Gladiator, variantes de elfo
+
+### 1.9 Dark Elf — 96 sprites 🆕
+
+**Sprite size:** Rostos/ícones  
+**Estilo:** Fantasia sombria — Elfo negro  
+**Origem:** `craftpix-636003`
+
+| Categoria | Conteúdo |
+|-----------|----------|
+| Dark_Elves | 8 personagens × 4 faces cada |
+| Dark_Elves_faces | Rostos em close |
+| Dark_Elves_faces_transparent | Rostos com fundo transparente |
+
+**Indicado para:** Classe Summoner, NPCs élficos sombrios, avatares de personagem
 
 ---
 
@@ -202,7 +291,49 @@ client/public/assets/
 
 ---
 
-## 5. Itens
+## 5. UI e Interface
+
+### 5.1 Avatares de Personagem — 50 ícones 🆕
+
+**Size:** ~256×256 px  
+**Origem:** `craftpix-net-414604` + `craftpix-net-988902`
+
+Retratos de personagens estilo RPG fantasia para:
+- Tela de seleção de personagem
+- Mini-retrato no HUD
+- Perfil do jogador
+
+### 5.2 Skill Icons — 50 ícones 🆕
+
+**Size:** ~64×64 px  
+**Origem:** `craftpix-net-640404`
+
+Ícones de habilidades Aeromancer:
+- Feitiços de vento, ar, tempestade
+- Ataques especiais
+- Buffs e debuffs
+
+**Uso:** Hotbar de skills, árvore de talentos, UI de combate
+
+### 5.3 Boot Icons — 50 ícones 🆕
+
+**Size:** ~64×64 px  
+**Origem:** `craftpix-net-138688`
+
+Ícones de botas e calçados para equipamento:
+- Botas de couro, metal, mágicas
+- Variações por tier (comum → lendário)
+
+### 5.4 Roguelike GUI — 214 elementos 🆕
+
+**Origem:** `craftpix-net-436971`
+
+Elementos de interface:
+- Botões (múltiplos estilos)
+- Janelas e molduras
+- Ícones diversos
+
+## 6. Itens
 
 ### Cyberpunk Icons — 40 ícones
 
@@ -221,7 +352,7 @@ client/public/assets/
 
 ---
 
-## 6. Veículos
+## 7. Veículos
 
 ### Truck Constructor — 105 peças
 
@@ -238,7 +369,7 @@ client/public/assets/
 
 ---
 
-## 7. Efeitos
+## 8. Efeitos
 
 ### Graffiti Constructor — 342 decals
 
@@ -255,7 +386,7 @@ client/public/assets/
 
 ---
 
-## 8. Licenças
+## 9. Licenças
 
 Todos os assets são de `craftpix.net` e estão sob licença **Free License** que permite:
 - ✅ Uso em projetos comerciais e não-comerciais

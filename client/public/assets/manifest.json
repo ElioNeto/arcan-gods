@@ -1,96 +1,97 @@
 {
-  "version": "1.0.0",
+  "version": "2.0.0",
   "generated": "2026-06-18",
   "source": "craftpix.net",
+  "totalSprites": 2900,
   "tileSize": 32,
   "assets": {
     "characters": {
       "cyberpunk": {
         "path": "characters/cyberpunk",
         "variants": ["biker", "punk", "cyborg"],
+        "spriteCount": 36,
         "animations": ["idle", "run", "run_attack", "jump", "doublejump", "climb", "punch", "hurt", "death", "attack1", "attack2", "attack3"]
       },
       "shinobi": {
         "path": "characters/shinobi",
         "variants": ["shinobi", "samurai", "fighter"],
+        "spriteCount": 30,
         "animations": ["Idle", "Walk", "Run", "Jump", "Attack_1", "Attack_2", "Attack_3", "Shield", "Hurt", "Dead"]
       },
       "vampire": {
         "path": "characters/vampire",
         "variants": ["converted", "countess", "girl"],
+        "spriteCount": 34,
         "animations": ["Idle", "Walk", "Run", "Jump", "Attack_1", "Attack_2", "Attack_3", "Attack_4", "Hurt", "Dead", "Protect", "Blood_Charge"]
+      },
+      "elf": {
+        "path": "characters/elf",
+        "spriteCount": 210,
+        "description": "Elfa arqueira com arco e flecha — perfeito para classe Elf",
+        "source": "craftpix-392011"
+      },
+      "wizard": {
+        "path": "characters/wizard",
+        "variants": ["ice", "lightning"],
+        "spriteCount": 116,
+        "description": "Mago de gelo (105 sprites) + Mago de relâmpago (11 spritesheets) — classe Dark Wizard",
+        "source": "craftpix-577002 + craftpix-529677"
+      },
+      "fairy": {
+        "path": "characters/fairy",
+        "spriteCount": 240,
+        "description": "Fada com asas e magia — para Summoner ou NPC especial",
+        "source": "craftpix-733001"
+      },
+      "assassin": {
+        "path": "characters/assassin",
+        "variants": ["Assassin", "Mage", "Viking"],
+        "spriteCount": 116,
+        "description": "3 heróis: Assassino (agilidade), Mago (magia), Viking (força)",
+        "source": "craftpix-891165"
+      },
+      "elf_warrior": {
+        "path": "characters/elf-warrior",
+        "spriteCount": 627,
+        "description": "Elfo guerreiro com espada — animações completas idle/walk/attack/hurt/death",
+        "source": "craftpix-933170"
+      },
+      "dark_elf": {
+        "path": "characters/dark-elf",
+        "spriteCount": 96,
+        "description": "Elfo sombrio com variações de face — para Dark Elf classe ou NPC",
+        "source": "craftpix-636003"
       }
     },
     "npcs": {
-      "townspeople": {
-        "path": "npcs/townspeople",
-        "count": 12,
-        "animations": ["Idle", "Walk", "Special"]
-      },
-      "schoolgirls": {
-        "path": "npcs/schoolgirls",
-        "variants": ["girl_1", "girl_2", "girl_3"],
-        "animations": ["Idle", "Walk", "Dialogue", "Attack", "Book", "Protection"]
-      }
+      "townspeople": { "path": "npcs/townspeople", "count": 12, "spriteCount": 30 },
+      "schoolgirls": { "path": "npcs/schoolgirls", "variants": ["girl_1", "girl_2", "girl_3"], "spriteCount": 16 }
     },
     "monsters": {
-      "city_enemies": {
-        "path": "monsters/city-enemies",
-        "count": 6,
-        "animations": ["Idle", "Walk", "Attack", "Hurt", "Death"]
-      },
-      "bosses": {
-        "path": "monsters/bosses",
-        "count": 3,
-        "animations": ["Idle", "Walk", "Attack1", "Attack2", "Attack3", "Attack4", "Hurt", "Death", "Sneer"]
-      },
-      "ghosts": {
-        "path": "monsters/ghosts",
-        "variants": ["gotoku", "onre", "yurei"],
-        "animations": ["Idle", "Walk", "Run", "Attack_1", "Attack_2", "Attack_3", "Attack_4", "Hurt", "Scream", "Dead", "Charge"]
-      },
-      "animals": {
-        "path": "monsters/animals",
-        "count": 8,
-        "animations": ["Idle", "Walk", "Hurt", "Death"]
-      },
-      "drones": {
-        "path": "monsters/drones",
-        "count": 5,
-        "animations": ["Idle", "Fly", "Attack", "Hurt", "Death"]
-      }
+      "city_enemies": { "path": "monsters/city-enemies", "count": 6, "spriteCount": 33 },
+      "bosses": { "path": "monsters/bosses", "count": 3, "spriteCount": 31 },
+      "ghosts": { "path": "monsters/ghosts", "variants": ["gotoku", "onre", "yurei"], "spriteCount": 32 },
+      "animals": { "path": "monsters/animals", "count": 8, "spriteCount": 36 },
+      "drones": { "path": "monsters/drones", "count": 5, "spriteCount": 31 }
     },
     "tilesets": {
-      "industrial": {
-        "path": "tilesets/industrial",
-        "tileSize": 32,
-        "layers": ["tiles", "background", "objects", "animated"]
-      },
-      "green_zone": {
-        "path": "tilesets/green-zone",
-        "tileSize": 32,
-        "layers": ["tiles", "background", "objects", "animated"],
-        "spritesheet": "Tileset.png"
-      }
+      "industrial": { "path": "tilesets/industrial", "tileSize": 32, "spriteCount": 143 },
+      "green_zone": { "path": "tilesets/green-zone", "tileSize": 32, "spriteCount": 192 }
     },
     "items": {
-      "icons": {
-        "path": "items/icons/cyberpunk",
-        "count": 40,
-        "size": 32
-      }
+      "cyberpunk_icons": { "path": "items/icons/cyberpunk", "count": 40, "size": 32 }
+    },
+    "ui": {
+      "boot_icons": { "path": "ui/boot-icons", "count": 50, "description": "Ícones de botas para equipamento" },
+      "avatars": { "path": "ui/avatars", "count": 50, "description": "Avatares de personagem RPG" },
+      "skill_icons": { "path": "ui/skill-icons", "count": 50, "description": "Ícones de skill Aeromancer" },
+      "roguelike_gui": { "path": "ui/roguelike", "count": 214, "description": "Botões, janelas e elementos GUI" }
     },
     "vehicles": {
-      "trucks": {
-        "path": "vehicles/trucks",
-        "parts": ["Bodies", "Chassis", "Additions", "Patches"]
-      }
+      "trucks": { "path": "vehicles/trucks", "spriteCount": 105 }
     },
     "effects": {
-      "graffiti": {
-        "path": "effects/graffiti",
-        "count": 342
-      }
+      "graffiti": { "path": "effects/graffiti", "spriteCount": 342 }
     }
   }
 }
