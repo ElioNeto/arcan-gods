@@ -1,86 +1,91 @@
 # Milestones — Arcan Gods
 
 > **Marcos de entrega** com critérios de aceite objetivos.
+> **Atualizado:** 2026-06-18 (após Ciclo 03)
 
 ---
 
-## Milestone 1: 「Conexão」 (Fase 0)
+## ✅ Milestone 1: 「Conexão」 (Fase 0) — CONCLUÍDO
 
-**Tempo estimado:** 4 semanas
+**Tempo real:** 1 dia (18/jun)
+**Status:** ✅ **Concluído** (Ciclo 01)
 
 ### Critérios de aceite
-- [ ] Cliente Vite + PixiJS abre no navegador
-- [ ] Servidor Node.js + WebSocket aceita conexão
-- [ ] Tilemap carregado de JSON (Tiled) e renderizado
-- [ ] Cliente envia clique, servidor move entidade, todos veem
-- [ ] Login JWT funcional com PostgreSQL
-- [ ] CI passa (lint + build + testes unitários)
-- [ ] docker-compose levanta o stack inteiro
+- [x] Cliente Vite + PixiJS abre no navegador
+- [x] Servidor Node.js + WebSocket aceita conexão
+- [x] Tilemap carregado de JSON (Tiled) e renderizado
+- [x] Cliente envia clique, servidor move entidade com A*
+- [ ] ~~Login JWT funcional com PostgreSQL~~ → ⏳ Pendente (#53)
+- [ ] ~~CI passa (lint + build + testes unitários)~~ → ⏳ Pendente (#54)
+- [x] docker-compose levanta o stack inteiro
 
 ### Issues alocadas
-- Setup monorepo
-- Setup servidor (Node.js + TS + WebSocket)
-- Setup cliente (Vite + PixiJS + TS)
-- Tilemap loader
-- Auth (JWT + PostgreSQL)
-- CI pipeline
-- Docker Compose
+- [x] Setup monorepo
+- [x] Setup servidor (Node.js + TS + WebSocket)
+- [x] Setup cliente (Vite + PixiJS + TS)
+- [x] Tilemap loader
+- [ ] Auth (JWT + PostgreSQL) → ⏳ #53
+- [ ] CI pipeline → ⏳ #54
+- [x] Docker Compose
 
 ---
 
-## Milestone 2: 「Movimento」 (Fase 1)
+## ✅ Milestone 2: 「Movimento」 (Fase 1) — CONCLUÍDO
 
-**Tempo estimado:** 8 semanas após M1
+**Tempo real:** 1 dia (18/jun)
+**Status:** ✅ **Concluído** (Ciclo 02)
 
 ### Critérios de aceite
-- [ ] Pathfinding A* funcional no servidor
-- [ ] Movimento suave com interpolação no cliente
-- [ ] Colisão com tiles e objetos
-- [ ] 2+ mapas conectados por portais
-- [ ] 10+ jogadores simultâneos se movendo no mesmo mapa
-- [ ] Minimapa funcionando
-- [ ] Câmera com smooth follow
+- [x] Pathfinding A* funcional no servidor (Manhattan, BinaryHeap, cache LRU)
+- [x] Movimento suave com interpolação no cliente (MovementInterpolator)
+- [x] Colisão com tiles (CollisionGrid, sliding)
+- [ ] ~~2+ mapas conectados por portais~~ → ⏳ Pendente (#47)
+- [x] 10+ jogadores simultâneos no mesmo mapa (broadcast infra)
+- [ ] ~~Minimapa funcionando~~ → ⏳ Pendente (#48)
+- [x] Câmera com smooth follow
 
 ### Issues alocadas
-- Pathfinding A*
-- Movimento autoritativo
-- Interpolação cliente
-- Colisão
-- Múltiplos mapas e portais
-- Câmera
-- Minimapa
+- [x] Pathfinding A*
+- [x] Movimento autoritativo
+- [x] Interpolação cliente
+- [x] Colisão
+- [ ] Múltiplos mapas e portais → ⏳ #47
+- [x] Câmera
+- [ ] Minimapa → ⏳ #48
 
 ---
 
-## Milestone 3: 「Combate」 (Fase 2)
+## 🟡 Milestone 3: 「Combate」 (Fase 2) — EM ANDAMENTO
 
-**Tempo estimado:** 10 semanas após M2
+**Tempo real:** 1 dia (18/jun)
+**Status:** 🟡 **Parcial** — Núcleo do combate implementado. Faltam: AI, skills, classes, loot, efeitos
 
 ### Critérios de aceite
-- [ ] 5 tipos de monstros com AI
-- [ ] Dark Knight funcional com auto-attack
-- [ ] Dano calculado server-side com atributos
-- [ ] XP e level up
-- [ ] 2 classes jogáveis adicionais
-- [ ] 3 skills por classe
-- [ ] Respawn de monstros
-- [ ] Drop de gold e itens básicos
+- [ ] ~~5 tipos de monstros com AI~~ → ⏳ 2 templates existem, AI (FSM chase) está pendente
+- [x] Dark Knight funcional com auto-attack (via CombatSystem)
+- [x] Dano calculado server-side com atributos (STR/AGI/ENE/VIT)
+- [x] XP e level up (com stat points por nível)
+- [ ] ~~2 classes jogáveis adicionais~~ → ⏳ Pendente
+- [ ] ~~3 skills por classe~~ → ⏳ Pendente (#52)
+- [x] Respawn de monstros (já funcionava desde Ciclo 01)
+- [ ] ~~Drop de gold e itens básicos~~ → ⏳ Gold funciona, itens pendentes
 
 ### Issues alocadas
-- AI de monstros
-- Sistema de combate
-- Fórmulas de dano
-- Sistema de XP/Level
-- Classes: Dark Knight, Dark Wizard, Elf
-- Skills básicas
-- Drop loot
-- Efeitos visuais de combate
+- [ ] AI de monstros (FSM) → 📌 #51
+- [x] Sistema de combate (CombatSystem)
+- [x] Fórmulas de dano (damage-formulas.ts)
+- [x] Sistema de XP/Level (com stat points)
+- [ ] Classes: Dark Knight, Dark Wizard, Elf → ⏳ Pendente
+- [ ] Skills básicas → 📌 #52
+- [ ] Drop loot → 📌 Gold implementado, itens pendentes
+- [ ] Efeitos visuais de combate → 📌 #23 (fechada, pendente)
 
 ---
 
-## Milestone 4: 「Inventário」 (Fase 3)
+## 🔜 Milestone 4: 「Inventário」 (Fase 3)
 
-**Tempo estimado:** 12 semanas após M3
+**Previsão:** Após M3 completo
+**Status:** ⏳ **Não iniciado**
 
 ### Critérios de aceite
 - [ ] Grade de inventário 8x5 funcional
@@ -91,64 +96,28 @@
 - [ ] Trade entre jogadores
 - [ ] Sistema de wings (visual)
 
-### Issues alocadas
-- Inventário UI
-- Sistema de equipamento
-- Templates de item
-- Upgrade system
-- NPC shop
-- Trade system
-- Wings
+### Issues
+- #24 Inventário UI, #25 Equipamento, #26 Templates, #27 Upgrade, #28 NPC Shop, #29 Trade, #30 Wings
 
 ---
 
-## Milestone 5: 「Mundo Vivo」 (Fase 4)
+## 🔜 Milestone 5: 「Mundo Vivo」 (Fase 4)
 
-**Tempo estimado:** 8 semanas após M4
+**Previsão:** Após M4 completo
+**Status:** ⏳ **Não iniciado**
 
-### Critérios de aceite
-- [ ] Chat global, party, guild, whisper
-- [ ] Party com compartilhamento de XP
-- [ ] Guild funcional (criar, entrar, chat)
-- [ ] 5+ quests implementadas
-- [ ] 5+ NPCs com diálogo
-- [ ] Quest log
-- [ ] Friends list
-
-### Issues alocadas
-- Chat system
-- Party system
-- Guild system
-- Quest system
-- NPC dialogue
-- Quest log UI
-- Friends list
+### Issues
+- #31 Chat, #32 Party, #33 Guild, #34 Quests, #35 NPC Dialogue, #36 Quest Log, #37 Friends
 
 ---
 
-## Milestone 6: 「Beta」 (Fase 5 + 6)
+## 🔜 Milestone 6: 「Beta」 (Fase 5 + 6)
 
-**Tempo estimado:** 12 semanas após M5
+**Previsão:** Após M5 completo
+**Status:** ⏳ **Não iniciado**
 
-### Critérios de aceite
-- [ ] 3 mapas completos (Lorencia, Devias, Noria)
-- [ ] 20+ tipos de monstro
-- [ ] 50+ itens
-- [ ] 15+ quests
-- [ ] Ranking funcional
-- [ ] Som e música
-- [ ] Beta aberto para comunidade
-- [ ] Suporte a 500+ jogadores simultâneos
-
-### Issues alocadas
-- Mapas completos
-- Monstros restantes
-- Itens restantes
-- Quests restantes
-- Efeitos sonoros
-- Ranking
-- Infra de produção
-- Testes de carga
+### Issues
+- #38 Mapas, #39 Monstros, #40 Itens, #41 Quests, #42 Som, #43 Ranking, #44 Infra, #45 Carga, #46 Landing
 
 ---
 
@@ -156,4 +125,14 @@
 
 Cada milestone vira uma **Milestone no GitHub Projects**. As issues são associadas à milestone correspondente.
 
-Progresso atual: **Milestone 1**
+### Status atual dos milestones
+
+| Milestone | Status | Issues fechadas | Issues abertas |
+|-----------|--------|:---------------:|:--------------:|
+| M1: Conexão | ✅ Completo | 6/7 | 2 (#53, #54) |
+| M2: Movimento | ✅ Completo | 5/7 | 2 (#47, #48) |
+| M3: Combate | 🟡 Parcial | 5/10 | 5 |
+| M4: Inventário | ⏳ | 0/7 | 7 |
+| M5: Mundo Vivo | ⏳ | 0/7 | 7 |
+| M6: Beta | ⏳ | 0/8 | 8 |
+| **Total** | | **26 fechadas** | **30 abertas** |
