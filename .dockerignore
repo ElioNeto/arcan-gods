@@ -1,0 +1,56 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Dependencies
+node_modules/
+.pnpm-store
+.npm
+
+# Build output
+dist/
+*.tsbuildinfo
+*.tsbuildinfo.*
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.docker
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Tests (not needed in production image)
+packages/*/src/__tests__/
+packages/*/src/**/__tests__/
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Assets source (too large, use organized versions)
+assets/
+!client/public/assets/
+
+# Docs (not needed in runtime)
+docs/
+*.md

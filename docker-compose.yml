@@ -1,0 +1,88 @@
+# ============================================================
+# Arcan Gods — Docker Compose
+# Stack completo: PostgreSQL + Redis + Server + Client
+# ============================================================
+
+version: "3.8"
+
+services:
+  # ─── Database ───────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: arcan-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: arcan_gods
+      POSTGRES_USER: arcan
+      POSTGRES_PASSWORD: arcan
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./packages/server/src/db/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arcan -d arcan_gods"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Cache / Session ────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: arcan-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Game Server ────────────────────────────────────────
+  server:
+    build:
+      context: .
+      dockerfile: packages/server/Dockerfile
+    container_name: arcan-server
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: production
+      SERVER_PORT: 3001
+      WS_PORT: 3001
+      DATABASE_URL: postgresql://arcan:arcan@postgres:5432/arcan_gods
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      JWT_EXPIRES_IN: 24h
+      TICK_RATE: 100
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - server_maps:/app/packages/server/dist/game/tilemap/maps
+
+  # ─── Web Client ─────────────────────────────────────────
+  client:
+    build:
+      context: .
+      dockerfile: packages/client/Dockerfile
+    container_name: arcan-client
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  server_maps:
+    driver: local
