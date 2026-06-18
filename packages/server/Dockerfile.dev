@@ -6,15 +6,15 @@
 FROM node:20-alpine
 WORKDIR /app
 
-# Copy root workspace config
-COPY package.json tsconfig.base.json ./
+# Copy root workspace config + lockfile
+COPY package.json package-lock.json tsconfig.base.json ./
 
-# Copy all package configs
+# Copy all workspace package configs
 COPY packages/shared/package.json packages/shared/
 COPY packages/server/package.json packages/server/
 
-# Install dependencies
-RUN npm install
+# Install ALL workspace dependencies
+RUN npm ci --no-audit --no-fund
 
 # Build shared (needed for module resolution)
 COPY packages/shared/ packages/shared/

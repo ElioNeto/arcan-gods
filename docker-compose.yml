@@ -3,8 +3,6 @@
 # Stack completo: PostgreSQL + Redis + Server + Client
 # ============================================================
 
-version: "3.8"
-
 services:
   # ─── Database ───────────────────────────────────────────
   postgres:

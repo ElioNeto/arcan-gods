@@ -7,8 +7,8 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 
-# Copy root workspace config
-COPY package.json tsconfig.base.json ./
+# Copy root workspace config + lockfile
+COPY package.json package-lock.json tsconfig.base.json ./
 
 # Copy shared package (needed for build)
 COPY packages/shared/ packages/shared/
@@ -17,7 +17,7 @@ COPY packages/shared/ packages/shared/
 COPY packages/server/package.json packages/server/
 
 # Install ALL dependencies (including devDeps for build)
-RUN npm install
+RUN npm ci --no-audit --no-fund
 
 # ---- Stage 2: Build shared package ----
 FROM deps AS build-shared

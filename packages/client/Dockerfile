@@ -7,17 +7,17 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copy root workspace config
-COPY package.json tsconfig.base.json ./
+# Copy root workspace config + lockfile
+COPY package.json package-lock.json tsconfig.base.json ./
 
 # Copy shared package (needed for build)
 COPY packages/shared/ packages/shared/
 
 # Copy client package config
-COPY packages/client/package.json packages/client/package-lock.json* packages/client/
+COPY packages/client/package.json packages/client/
 
-# Install dependencies
-RUN npm install
+# Install ALL workspace dependencies
+RUN npm ci --no-audit --no-fund
 
 # Build shared first
 RUN npm run build -w packages/shared
