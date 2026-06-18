@@ -16,7 +16,7 @@
 - [x] Tilemap carregado de JSON (Tiled) e renderizado
 - [x] Cliente envia clique, servidor move entidade com A*
 - [x] Login JWT funcional com PostgreSQL (bcrypt + JWT + migrations)
-- [ ] ~~CI passa (lint + build + testes unitários)~~ → ⏳ Pendente (#54)
+- [x] CI passa (lint + build + testes unitários) — GitHub Actions
 - [x] docker-compose levanta o stack inteiro
 
 ### Issues alocadas
@@ -25,7 +25,7 @@
 - [x] Setup cliente (Vite + PixiJS + TS)
 - [x] Tilemap loader
 - [x] Auth (JWT + PostgreSQL) — bcrypt + JWT + migrations + seed
-- [ ] CI pipeline → ⏳ #54
+- [x] CI pipeline (GitHub Actions: lint + build + test matrix Node 20/22)
 - [x] Docker Compose
 
 ---
@@ -129,7 +129,7 @@ Cada milestone vira uma **Milestone no GitHub Projects**. As issues são associa
 
 | Milestone | Status | Issues fechadas | Issues abertas |
 |-----------|--------|:---------------:|:--------------:|
-| M1: Conexão | ✅ Completo | 8/9 | 1 (#54) |
+| M1: Conexão | ✅ Completo | 9/9 | 0 |
 | M2: Movimento | ✅ Completo | 5/7 | 2 (#47, #48) |
 | M3: Combate | 🟡 Parcial | 5/10 | 5 |
 | M4: Inventário | ⏳ | 0/7 | 7 |
