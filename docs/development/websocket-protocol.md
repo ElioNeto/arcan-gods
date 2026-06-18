@@ -7,6 +7,8 @@ A comunicação cliente-servidor usa **WebSocket** com mensagens **JSON**. Cada 
 - **Porta:** 3001
 - **Formato:** JSON stringify/parse
 - **Heartbeat:** A cada 3 segundos (configurável em `NETWORK_CONFIG.HEARTBEAT_INTERVAL`)
+- **Anti-flood:** Máximo 30 mensagens/segundo por conexão
+- **Anti-speedhack:** Movimento validado com distância máxima de 5 tiles/packet
 
 ## Pacotes do Cliente → Servidor
 
@@ -40,30 +42,41 @@ Registrar nova conta.
 
 ### `PLAYER_MOVE`
 
-Move o jogador para uma posição no mapa.
+Solicita movimento para um destino. O servidor calcula pathfinding A* e move o jogador continuamente.
 
 ```typescript
-{ type: 'PLAYER_MOVE'; x: number; y: number }
+{ type: 'PLAYER_MOVE'; destX: number; destY: number; timestamp?: number }
 ```
 
 **Validação:**
-- `MoveSchema` (Zod): x e y inteiros entre 0 e 255
-- Anti-teleporte: distância máxima de 5 tiles por pacote
-- Bounds do mapa: 0-255
+- `MoveSchema` (Zod): destX/destY inteiros entre 0 e 4095
+- Anti-teleporte: distância máxima de 5 tiles por pacote (fallback)
+- Walkable validation via CollisionGrid
+- Pathfinding A* com cache LRU
 
-**Respostas possíveis:** `PLAYER_MOVED` (sucesso), `ERROR` com código `MOVE_TOO_FAR` ou `MOVE_INVALID`
+**Respostas possíveis:**
+- `PLAYER_PATH` com array de waypoints (início do movimento)
+- `PLAYER_MOVED` a cada tick enquanto move
+- `ERROR` com código `MOVE_FAILED`, `MOVE_INVALID`, `MOVE_TOO_FAR`
 
 ---
 
 ### `PLAYER_ATTACK`
 
-Ataca um alvo.
+Ataca um alvo (monstro ou jogador).
 
 ```typescript
 { type: 'PLAYER_ATTACK'; targetId: string }
 ```
 
-**Status:** ⚠️ Retorna `ERROR` com código `NOT_IMPLEMENTED` (será implementado no Ciclo 02).
+**Validação:**
+- Alvo existe e está vivo
+- Alcance: distância Manhattan ≤ 2 tiles
+- Cooldown: 500ms entre ataques
+
+**Respostas possíveis:**
+- `ENTITY_DAMAGED` com dados do ataque
+- `ERROR` com código `ATTACK_FAILED`, `TARGET_DEAD`, `OUT_OF_RANGE`, `ON_COOLDOWN`
 
 ---
 
@@ -173,17 +186,51 @@ Remoção de uma entidade (ex: monstro morto).
 
 ---
 
-### `PLAYER_MOVED`
+### `PLAYER_PATH`
 
-Notificação de movimento de um jogador.
+Caminho A* calculado para o jogador (enviado ao iniciar movimento).
 
 ```typescript
-{ type: 'PLAYER_MOVED'; id: string; x: number; y: number; direction: Direction }
+{ type: 'PLAYER_PATH'; id: string; path: Waypoint[] }
+```
+
+`Waypoint` = `{ x: number; y: number }`
+
+---
+
+### `PLAYER_MOVED`
+
+Notificação de movimento de um jogador (enviado a cada tick enquanto move).
+
+```typescript
+{ type: 'PLAYER_MOVED'; id: string; x: number; y: number; direction: Direction; path?: Waypoint[] }
 ```
 
 `Direction` = `'down' | 'left' | 'right' | 'up'`
 
 Enviado para todos os jogadores no mesmo mapa quando alguém se move.
+
+---
+
+### `MAP_DATA`
+
+Dados do tilemap enviado ao entrar em um novo mapa.
+
+```typescript
+{ type: 'MAP_DATA'; map: IMapData }
+```
+
+`IMapData` = `{ mapId, width, height, tileSize, layers: ITileLayer[], collisionGrid: boolean[][] }`
+
+---
+
+### `ENTITY_DAMAGED`
+
+Resultado de um ataque (enviado após PLAYER_ATTACK).
+
+```typescript
+{ type: 'ENTITY_DAMAGED'; attackerId: string; targetId: string; damage: number; isCritical: boolean; isBlocked: boolean; targetHp: number; targetMaxHp: number; killed: boolean; expGain?: number; goldGain?: number }
+```
 
 ---
 
@@ -209,8 +256,16 @@ Erro genérico do servidor.
 | Código | Significado |
 |--------|-------------|
 | `NOT_IMPLEMENTED` | Funcionalidade ainda não implementada |
+| `NOT_AUTH` | Ação requer autenticação |
 | `MOVE_TOO_FAR` | Distância de movimento excede o limite |
 | `MOVE_INVALID` | Coordenadas inválidas |
+| `MOVE_FAILED` | Pathfinding não encontrou caminho |
+| `MOVE_OUT_OF_BOUNDS` | Fora dos limites do mapa |
+| `ATTACK_FAILED` | Ataque inválido (range/cooldown/alvo) |
+| `TARGET_DEAD` | Alvo já está morto |
+| `OUT_OF_RANGE` | Alvo fora do alcance |
+| `ON_COOLDOWN` | Ação em cooldown |
+| `CHAT_INVALID` | Mensagem de chat inválida |
 | `UNKNOWN_TYPE` | Tipo de pacote desconhecido |
 | `RATE_LIMIT` | Excedeu limite de requisições |
 
@@ -237,9 +292,15 @@ Cliente                          Servidor
   │── AUTH_LOGIN {email, pass} ───►│
   │◄── AUTH_SUCCESS {token,player}│
   │◄── WORLD_STATE {entities} ────│
+  │◄── MAP_DATA {map} ───────────│
   │                                 │
-  │── PLAYER_MOVE {x:50, y:60} ───►│
+  │── PLAYER_MOVE {destX,destY} ──►│
+  │◄── PLAYER_PATH {path[]} ─────│
+  │  (servidor move tick a tick)    │
   │◄── PLAYER_MOVED {id,x,y,dir}─│
+  │                                 │
+  │── PLAYER_ATTACK {targetId} ───►│
+  │◄── ENTITY_DAMAGED {dano,hp} ──│
   │                                 │
   │── PLAYER_CHAT "Hello!" ───────►│
   │◄── CHAT_MESSAGE {eco} ────────│

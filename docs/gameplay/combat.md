@@ -1,79 +1,111 @@
 # Sistema de Combate
 
-## Alvo
+> **Status:** ✅ Implementado (Ciclo 03) — 247 testes
 
-Combate em tempo real. Jogador clica no alvo (monstro ou outro player) e o personagem ataca automaticamente até o alvo morrer ou sair de range.
+## Visão Geral
 
-## Fórmula de Dano (Física)
+O combate é **server-authoritative**. O jogador clica em um alvo (PLAYER_ATTACK), o servidor valida e calcula o dano usando fórmulas matemáticas, e retorna o resultado (ENTITY_DAMAGED).
 
-```
-Dano Base = (STR * 1.5) + (AGI * 0.5) + WeaponDamage
-Dano Final = Dano Base - TargetDefense
-```
-
-Onde:
-- **STR:** Força do atacante
-- **AGI:** Agilidade do atacante (contribui menos)
-- **WeaponDamage:** Dano aleatório entre min_damage e max_damage da arma
-- **TargetDefense:** Defesa do alvo
-
-## Fórmula de Dano (Mágico)
+## Fluxo
 
 ```
-Dano Base = (ENE * 2.0) + WeaponMagicDamage
-Dano Final = Dano Base - TargetMagicDefense
+Cliente                                   Servidor
+  │                                          │
+  │── PLAYER_ATTACK {targetId} ────────────►│
+  │                                          ├── Valida: alvo existe, vivo
+  │                                          ├── Valida: distância ≤ 2 tiles (Manhattan)
+  │                                          ├── Valida: cooldown ≥ 500ms
+  │                                          ├── Calcula: hit rate (AGI + level)
+  │                                          ├── Calcula: crítico (10% + 0.5%/AGI)
+  │                                          ├── Calcula: dano físico (STR * 2 + level * 1.5)
+  │                                          ├── Aplica: defesa (def / 2)
+  │                                          ├── Aplica: dano no alvo
+  │                                          ├── Se kill: XP + Gold
+  │◄── ENTITY_DAMAGED {damage, hp, killed}─│
 ```
 
-## Chance de Acerto
+## Fórmulas
+
+### Dano Físico (Dark Knight, Magic Gladiator)
 
 ```
-Chance = 90% + (AGI_attacker - AGI_target) * 0.1%
-Cap: 95% max, 5% min
+Base      = (STR × 2) + (level × 1.5)
+Variação  = random(0, weaponDamage)
+Dano Bruto = Base + Variação
 ```
 
-## Chance de Crítico
+### Dano Mágico (Dark Wizard, Summoner)
 
 ```
-Chance = AGI / 1000
-Dano crítico = Dano * 1.5
+Base      = (ENE × 2.5) + (level × 2)
+Variação  = random(0, skillDamage)
+Dano Bruto = Base + Variação
 ```
 
-## Defesa
+### Defesa
 
 ```
-Defense = (VIT * 0.5) + ArmorDefense + ShieldDefense
+Redução = defesa ÷ 2
+Dano Final = max(1, Dano Bruto - Redução)
 ```
 
-## HP máximo
+### Acerto (Hit Rate)
 
 ```
-HP = 80 + (VIT * 2) + Level * 5 + Bônus de itens
+Chance = 50 + (AGI × 2) + (atkLevel - defLevel) × 3
+Mínimo: 20% | Máximo: 95%
 ```
 
-## MP máximo
+### Crítico
 
 ```
-MP = 20 + (ENE * 1.5) + Level * 3 + Bônus de itens
+Chance = 10 + floor(AGI × 0.5)
+Multiplicador: 1.5×
 ```
 
-## XP
+### Experiência (ao matar monstro)
 
 ```
-XP necessária para level N = 1000 * N^1.5
-XP do monstro = MonsterLevel * 50 + Bonus
-XP em party = XP_total * (1 + 0.3 * (members - 1)) / members
+Multiplicador:
+  monstro ≥ +5 níveis:  1.5×
+  monstro +2 a +4:      1.2×
+  monstro -1 a +1:      1.0×
+  monstro -2 a -4:      0.8×
+  monstro ≤ -5 níveis:  0.5×
+
+XP Final = baseExp × multiplicador
 ```
 
-## Drop
+### Gold
 
 ```
-Chance de drop:
-  - Gold: 100% (GoldDrop = MonsterLevel * random(10, 50))
-  - Item comum: 40%
-  - Item mágico: 15%
-  - Item raro: 5%
-  - Item único: 1%
-  - Item lendário: 0.1%
-
-Cada monstro tem uma drop table configurável em JSON.
+Gold = baseGold × (1 + playerLevel × 0.1)
 ```
+
+## Constantes
+
+| Parâmetro | Valor | Descrição |
+|-----------|:-----:|-----------|
+| `ATTACK_RANGE` | 2 | Alcance máximo em tiles |
+| `ATTACK_COOLDOWN` | 500ms | Intervalo entre ataques |
+| `CRIT_BASE_CHANCE` | 10% | Chance base de crítico |
+| `HIT_RATE_MIN` | 20% | Acerto mínimo |
+| `HIT_RATE_MAX` | 95% | Acerto máximo |
+| `BASE_HP` | 50 | HP inicial |
+| `BASE_MP` | 10 | MP inicial |
+| `STAT_POINTS_PER_LEVEL` | 5 | Pontos de atributo por level |
+
+## Monster Templates Atuais
+
+| Monstro | Level | HP | Dano | Defesa | EXP | Gold | Aggro |
+|---------|:-----:|:--:|:----:|:-----:|:---:|:----:|:-----:|
+| Buddy Buddy | 1 | 50 | 5-10 | 2 | 10 | 5 | 4 |
+| Spider | 3 | 80 | 8-15 | 3 | 25 | 10 | 5 |
+
+## Pendências
+
+- [ ] AI de monstros (FSM: idle/aggro/chase/attack) — #51
+- [ ] Skills por classe (Energy Ball, Twisting Slash) — #52
+- [ ] Animações de ataque e morte (cliente)
+- [ ] Efeitos visuais (partículas, damage numbers)
+- [ ] Drop de itens (apenas gold atualmente)

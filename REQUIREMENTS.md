@@ -1,6 +1,6 @@
 # Requisitos — Arcan Gods
 
-> **Status:** Atualizado · Versão 0.2 · Ciclo 01 concluído (2026-06-18)
+> **Status:** Atualizado · Versão 0.3 · Ciclo 03 concluído (2026-06-18) · 247 testes, 26 issues fechadas
 
 ---
 
@@ -8,125 +8,125 @@
 
 ### 1.1 Autenticação e Conta
 
-| ID | Descrição | Prioridade | Status Ciclo 01 |
-|----|-----------|------------|-----------------|
-| RF-001 | O usuário deve poder criar uma conta com email + senha | Alta | ✅ Funcional via WS (dev mode) |
-| RF-002 | O usuário deve poder fazer login com credenciais | Alta | ✅ Funcional via WS (dev mode) |
-| RF-003 | O servidor deve validar sessão via JWT em cada conexão WebSocket | Alta | ⚠️ Parcial (token mock, PostgreSQL pendente) |
-| RF-004 | O usuário deve poder recuperar senha por email | Média | ❌ Futuro |
-| RF-005 | O usuário deve poder deletar a própria conta | Baixa | ❌ Futuro |
+| ID | Descrição | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-001 | Criar conta com email + senha | Alta | ✅ Ciclo 01 (WS, dev mode) |
+| RF-002 | Login com credenciais | Alta | ✅ Ciclo 01 (WS, dev mode) |
+| RF-003 | JWT em conexão WebSocket | Alta | ⚠️ Parcial (mock, #53) |
+| RF-004 | Recuperar senha por email | Média | ❌ Futuro |
+| RF-005 | Deletar a própria conta | Baixa | ❌ Futuro |
 
 ### 1.2 Mundo e Movimentação
 
-| ID | Descrição | Prioridade | Status Ciclo 01 |
-|----|-----------|------------|-----------------|
-| RF-010 | O mapa deve ser baseado em tiles (grid 2D isométrico ou top-down) | Alta | ✅ Constantes definidas (TILE_SIZE=32), placeholders gerados |
-| RF-011 | O jogador deve se movimentar clicando no destino (pathfinding automático) | Alta | ✅ Protocolo + validação server-side implementados |
-| RF-012 | A câmera deve seguir o jogador centralizado na tela | Alta | ✅ Camera implementada com smooth follow |
-| RF-013 | Múltiplos mapas devem ser conectados por "portais" (boundaries) | Alta | ❌ Futuro |
-| RF-014 | Objetos estáticos (árvores, muros, NPCs) devem colidir com o jogador | Alta | ❌ Futuro |
-| RF-015 | O mapa deve ter camadas: chão, objetos, topo (para efeito de profundidade) | Média | ❌ Futuro |
-| RF-016 | Devem existir áreas seguras (sem PvP) e áreas de batalha | Média | ❌ Futuro |
+| ID | Descrição | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-010 | Mapa baseado em tiles | Alta | ✅ Ciclo 02 (TilemapLoader, GAME_CONSTANTS) |
+| RF-011 | Movimento com pathfinding | Alta | ✅ Ciclo 02 (A* + MovementSystem) |
+| RF-012 | Câmera segue jogador | Alta | ✅ Ciclo 01 (Camera.ts) |
+| RF-013 | Múltiplos mapas com portais | Alta | ⚠️ Parcial (#47) |
+| RF-014 | Colisão com objetos estáticos | Alta | ✅ Ciclo 02 (CollisionSystem) |
+| RF-015 | Camadas de mapa | Média | ❌ Futuro |
+| RF-016 | Áreas seguras vs PvP | Média | ❌ Futuro |
 
 ### 1.3 Personagem
 
-| ID | Descrição | Prioridade | Status Ciclo 01 |
-|----|-----------|------------|-----------------|
-| RF-020 | O jogador pode criar múltiplos personagens por conta | Alta | ❌ Futuro (P1.1) |
-| RF-021 | Classes disponíveis: Dark Knight, Dark Wizard, Elf, Summoner, Magic Gladiator | Alta | ✅ Types + stats base definidos no shared |
-| RF-022 | Atributos: Level, Experience, Strength, Agility, Energy, Vitality | Alta | ✅ Na entidade ICharacter/IPlayer |
-| RF-023 | O personagem ganha XP ao matar monstros e sobe de level | Alta | ⚠️ Função pronta (addExperience), fluxo completo no ciclo 2 |
-| RF-024 | Ao subir de level, o jogador recebe pontos para distribuir em atributos | Alta | ⚠️ Level up funciona, distribuição de stats pendente |
-| RF-025 | O personagem possui HP, MP, Stamina | Alta | ✅ HP e MP implementados (Stamina: futuro) |
-| RF-026 | O personagem pode morrer, perder XP e resetar no último checkpoint | Média | ❌ Futuro |
+| ID | Descrição | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-020 | Múltiplos personagens por conta | Alta | ❌ Pendente (#53) |
+| RF-021 | 5 classes disponíveis | Alta | ✅ Types definidos, 1 funcional (DK) |
+| RF-022 | Atributos STR/AGI/ENE/VIT | Alta | ✅ Player entity + fórmulas |
+| RF-023 | XP ao matar monstros | Alta | ✅ Ciclo 03 (CombatSystem) |
+| RF-024 | Pontos de atributo no level up | Alta | ✅ Ciclo 03 (5 pts/nível) |
+| RF-025 | HP, MP, Stamina | Alta | ⚠️ Parcial (HP/MP ok, Stamina #57) |
+| RF-026 | Morte com perda de XP | Média | ❌ Futuro |
 
 ### 1.4 Combate
 
-| ID | Descrição | Prioridade | Status Ciclo 01 |
-|----|-----------|------------|-----------------|
-| RF-030 | O combate é em tempo real, baseado em clique no alvo | Alta | ⚠️ Protocolo definido, handler retorna NOT_IMPLEMENTED |
-| RF-031 | O dano é calculado no servidor (anti-cheat) | Alta | ✅ Arquitetura server-authoritative implementada |
-| RF-032 | Monstros possuem AI com aggro, chase, ataque e patrol | Alta | ❌ Futuro |
-| RF-033 | Monstros respawnam após tempo configurável | Alta | ✅ GameEngine com respawn de monstros |
-| RF-034 | Monstros drops itens, gold e experiência | Alta | ❌ Futuro |
-| RF-035 | O PvP é liberado em áreas específicas | Média | ❌ Futuro |
-| RF-036 | Sistema de PK (Player Killer) com penalidades | Baixa | ❌ Futuro |
+| ID | Descrição | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-030 | Combate em tempo real | Alta | ✅ Ciclo 03 (CombatSystem + clique) |
+| RF-031 | Dano calculado no servidor | Alta | ✅ Ciclo 03 (fórmulas server-side) |
+| RF-032 | AI de monstros (aggro/chase/attack) | Alta | ⚠️ Parcial (#51) |
+| RF-033 | Respawn de monstros | Alta | ✅ Ciclo 01 (Monster.ts) |
+| RF-034 | Drop de itens, gold e XP | Alta | ⚠️ Parcial (gold/XP ok, itens #22) |
+| RF-035 | PvP em áreas específicas | Média | ❌ Futuro |
+| RF-036 | PK com penalidades | Baixa | ❌ Futuro |
 
 ### 1.5 Skills
 
-| ID | Descrição | Prioridade |
-|----|-----------|------------|
-| RF-040 | Cada classe tem uma árvore de skills única | Alta |
-| RF-041 | Skills podem ser usadas com teclas de atalho (hotkeys) | Alta |
-| RF-042 | Skills consomem MP e possuem cooldown | Alta |
-| RF-043 | Skills podem ser evoluídas ao gastar pontos de skill | Alta |
-| RF-044 | Efeitos visuais (partículas, animações) devem acompanhar as skills | Média |
-| RF-045 | Buffs e debuffs com duração limitada | Média |
-| RF-046 | Combo skills (sequência que ativa skill especial) | Baixa |
+| ID | Descrição | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-040 | Árvore de skills única | Alta | ❌ Pendente (#52) |
+| RF-041 | Hotkeys para skills | Alta | ❌ Pendente (#52) |
+| RF-042 | Skills consomem MP e cooldown | Alta | ❌ Pendente (#52) |
+| RF-043 | Evoluir skills com pontos | Alta | ❌ Futuro |
+| RF-044 | Efeitos visuais nas skills | Média | ❌ Fatura |
+| RF-045 | Buffs e debuffs | Média | ❌ Futuro |
+| RF-046 | Combo skills | Baixa | ❌ Futuro |
 
 ### 1.6 Itens e Inventário
 
-| ID | Descrição | Prioridade |
-|----|-----------|------------|
-| RF-050 | Inventário com grade de slots (8x5) | Alta |
-| RF-051 | Itens possuem: nome, tier, stats, requisitos (level/class) | Alta |
-| RF-052 | Categorias: weapon, armor, helmet, boots, gloves, shield, wings, jewelry | Alta |
-| RF-053 | Drop aleatório baseado em chance do monstro + luck rate | Alta |
-| RF-054 | Sistema de upgrade de itens (até +15 com chance de falha) | Alta |
-| RF-055 | Itens podem ser trocados entre jogadores | Média |
-| RF-056 | Item pode ser vendido para NPC por gold | Média |
-| RF-057 | Cash shop com itens cosméticos | Baixa |
+| ID | Descrição | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-050 | Inventário 8x5 | Alta | ❌ Pendente (M4) |
+| RF-051 | Itens com nome, tier, stats | Alta | ❌ Pendente (M4) |
+| RF-052 | Categorias: weapon, armor, etc. | Alta | ⚠️ Types definidos (shared/enums) |
+| RF-053 | Drop aleatório | Alta | ⚠️ Gold funciona, itens pendentes |
+| RF-054 | Upgrade de itens (+15) | Alta | ❌ Pendente (M4) |
+| RF-055 | Trade entre jogadores | Média | ❌ Pendente (M4) |
+| RF-056 | Vender para NPC | Média | ❌ Pendente (M4) |
+| RF-057 | Cash shop | Baixa | ❌ Futuro |
 
 ### 1.7 NPCs e Quests
 
-| ID | Descrição | Prioridade |
-|----|-----------|------------|
-| RF-060 | NPCs com diálogo (talk tree) | Alta |
-| RF-061 | NPCs de loja (comprar/vender itens) | Alta |
-| RF-062 | Sistema de quests: kill quest, fetch quest, delivery quest | Alta |
-| RF-063 | Quests recompensam com XP, gold e itens | Alta |
-| RF-064 | Quest log mostrando quests ativas e completas | Média |
+| ID | Descrição | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-060 | NPCs com diálogo | Alta | ❌ Pendente (M5) |
+| RF-061 | NPCs de loja | Alta | ❌ Pendente (M4) |
+| RF-062 | Sistema de quests | Alta | ❌ Pendente (M5) |
+| RF-063 | Recompensas de quest | Alta | ❌ Pendente (M5) |
+| RF-064 | Quest log | Média | ❌ Pendente (M5) |
 
 ### 1.8 Social
 
-| ID | Descrição | Prioridade | Status Ciclo 01 |
-|----|-----------|------------|-----------------|
-| RF-070 | Chat global, party, guild, whisper | Alta | ✅ Chat global funcional, estrutura para party/guild/whisper |
-| RF-071 | Party system com compartilhamento de XP | Alta | ❌ Futuro |
-| RF-072 | Guild system com nome, tag, membros | Alta | ❌ Futuro |
+| ID | Descrição | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-070 | Chat global/party/guild/whisper | Alta | ⚠️ Chat global implementado |
+| RF-071 | Party com compartilhamento de XP | Alta | ❌ Pendente (M5) |
+| RF-072 | Guild system | Alta | ❌ Pendente (M5) |
 | RF-073 | Guild wars | Baixa | ❌ Futuro |
-| RF-074 | Sistema de amizade (friends list) | Média | ❌ Futuro |
-| RF-075 | Trade entre jogadores (janela de troca segura) | Média | ❌ Futuro |
+| RF-074 | Friends list | Média | ❌ Pendente (M5) |
+| RF-075 | Trade entre jogadores | Média | ❌ Pendente (M4) |
 
 ### 1.9 UI/UX
 
-| ID | Descrição | Prioridade |
-|----|-----------|------------|
-| RF-080 | HUD com HP/MP/XP bar, minimapa, skill hotbar | Alta |
-| RF-081 | Menu de personagem (stats, equipamentos) | Alta |
-| RF-082 | Janela de inventário arrastável | Alta |
-| RF-083 | Notificações de level up, drop, etc. | Média |
-| RF-084 | Tela de ranking (top players por level) | Média |
-| RF-085 | Settings: áudio, qualidade gráfica, keybinds | Média |
-| RF-086 | Suporte a mobile (layout responsivo) | Baixa |
+| ID | Descrição | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-080 | HUD com HP/MP/XP, minimapa, hotbar | Alta | ⚠️ Parcial (#55) |
+| RF-081 | Menu de personagem | Alta | ❌ Pendente |
+| RF-082 | Inventário arrastável | Alta | ❌ Pendente (M4) |
+| RF-083 | Notificações | Média | ❌ Pendente |
+| RF-084 | Ranking | Média | ❌ Pendente (M6) |
+| RF-085 | Settings | Média | ❌ Pendente |
+| RF-086 | Suporte mobile | Baixa | ❌ Futuro |
 
 ---
 
 ## 2. Requisitos Não-Funcionais
 
-| ID | Descrição | Prioridade | Status Ciclo 01 |
-|----|-----------|------------|-----------------|
-| RNF-001 | Latência máxima de 200ms para ações de combate | Alta | ❌ Futuro |
-| RNF-002 | Suporte a 500+ jogadores simultâneos por servidor (inicial) | Alta | ❌ Futuro |
-| RNF-003 | Tick rate do servidor: 10 Hz | Alta | ✅ Implementado (TICK_RATE=100ms) |
-| RNF-004 | Todo cálculo crítico (dano, drop) deve ser server-side | Alta | ✅ Arquitetura server-authoritative |
-| RNF-005 | Cliente deve rodar a 60 FPS em GPUs integradas modernas | Média | ⚠️ Game loop RAF implementado, sem medições |
-| RNF-006 | Asset total inicial < 50 MB (otimizado para carregamento web) | Média | ✅ Placeholders canvas (zero assets externos) |
-| RNF-007 | Código em TypeScript com strict mode | Alta | ✅ tsconfig strict mode ativado |
-| RNF-008 | Testes unitários cobrindo lógica de negócio | Alta | ✅ 73 testes implementados |
-| RNF-009 | CI/CD via GitHub Actions | Alta | ❌ Futuro (P1.3) |
-| RNF-010 | Logs estruturados e monitoramento | Média | ✅ Logger estruturado JSON implementado |
-| RNF-011 | Suporte a i18n (pt-BR, en-US inicialmente) | Baixa | ❌ Futuro |
+| ID | Descrição | Prioridade | Status |
+|----|-----------|------------|--------|
+| RNF-001 | Latência máxima de 200ms para combate | Alta | ⚠️ Pendente teste de carga |
+| RNF-002 | Suporte a 500+ jogadores simultâneos | Alta | ❌ Pendente (#45) |
+| RNF-003 | Tick rate do servidor: 10 Hz | Alta | ✅ GameEngine: setInterval(100ms) |
+| RNF-004 | Todo cálculo server-side | Alta | ✅ CombatSystem + MovementSystem |
+| RNF-005 | Cliente 60 FPS em GPUs integradas | Média | ✅ PixiJS com RAF, aguardando benchmark |
+| RNF-006 | Asset total < 50 MB | Média | ✅ 7.3 MB (2900 sprites organizados) |
+| RNF-007 | TypeScript strict mode | Alta | ✅ tsconfig.base.json: strict: true |
+| RNF-008 | Testes unitários | Alta | ✅ 247 testes (Vitest) |
+| RNF-009 | CI/CD via GitHub Actions | Alta | ❌ Pendente (#54) |
+| RNF-010 | Logs estruturados | Média | ✅ Logger JSON (debug/info/warn/error) |
+| RNF-011 | i18n (pt-BR, en-US) | Baixa | ❌ Futuro |
 
 ---
 
