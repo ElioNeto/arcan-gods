@@ -25,4 +25,5 @@ export type ServerPacket =
   | { type: 'CHAT_MESSAGE'; id: string; name: string; message: string; channel: ChatChannel }
   | { type: 'ERROR'; message: string; code: string }
   | { type: 'HEARTBEAT_ACK'; timestamp: number }
-  | { type: 'CONNECTED'; message: string };
+  | { type: 'CONNECTED'; message: string }
+  | { type: 'ENTITY_DAMAGED'; attackerId: string; targetId: string; damage: number; isCritical: boolean; isBlocked: boolean; targetHp: number; targetMaxHp: number; killed: boolean; expGain?: number; goldGain?: number };

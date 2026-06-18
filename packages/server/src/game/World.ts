@@ -2,12 +2,14 @@ import { Player } from './entities/Player.js';
 import { Monster } from './entities/Monster.js';
 import type { ServerPacket } from '@arcan-gods/shared';
 import type { MovementSystem } from './systems/MovementSystem.js';
+import type { CombatSystem } from './systems/CombatSystem.js';
 
 export class World {
   private players: Map<string, Player> = new Map();
   private monsters: Map<string, Monster> = new Map();
   private playerSocketMap: Map<string, string> = new Map(); // socketId -> playerId
   private movementSystem: MovementSystem | null = null;
+  private combatSystem: CombatSystem | null = null;
 
   // --- Player Management ---
 
@@ -93,6 +95,16 @@ export class World {
 
   getMovementSystem(): MovementSystem | null {
     return this.movementSystem;
+  }
+
+  // --- Combat System ---
+
+  setCombatSystem(cs: CombatSystem): void {
+    this.combatSystem = cs;
+  }
+
+  getCombatSystem(): CombatSystem | null {
+    return this.combatSystem;
   }
 
   // --- Cleanup ---

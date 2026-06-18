@@ -172,11 +172,39 @@ function handlePlayerMove(ws: WebSocket, socketData: SocketData, packet: ClientP
   sendMessage(ws, movedPacket);
 }
 
-function handlePlayerAttack(ws: WebSocket, _socketData: SocketData, _packet: ClientPacket & { type: 'PLAYER_ATTACK' }, _world: World): void {
+function handlePlayerAttack(ws: WebSocket, socketData: SocketData, packet: ClientPacket & { type: 'PLAYER_ATTACK' }, world: World): void {
+  const player = world.getPlayerBySocket(socketData.id);
+  if (!player) {
+    sendMessage(ws, { type: 'ERROR', message: 'Not authenticated', code: 'NOT_AUTH' });
+    return;
+  }
+
+  const combatSystem = world.getCombatSystem();
+  if (!combatSystem) {
+    sendMessage(ws, { type: 'ERROR', message: 'Combat system unavailable', code: 'COMBAT_UNAVAILABLE' });
+    return;
+  }
+
+  const result = combatSystem.processAttack(player.id, packet.targetId);
+
+  if (!result.success) {
+    sendMessage(ws, { type: 'ERROR', message: result.error || 'Attack failed', code: 'ATTACK_FAILED' });
+    return;
+  }
+
+  // Send attack result back to the attacker
   sendMessage(ws, {
-    type: 'ERROR',
-    message: 'Combat not yet implemented',
-    code: 'NOT_IMPLEMENTED',
+    type: 'ENTITY_DAMAGED',
+    attackerId: player.id,
+    targetId: result.targetId!,
+    damage: result.damage!,
+    isCritical: result.isCritical!,
+    isBlocked: result.isBlocked!,
+    targetHp: result.targetHp!,
+    targetMaxHp: result.targetMaxHp!,
+    killed: result.killed!,
+    expGain: result.expGain,
+    goldGain: result.goldGain,
   });
 }
 

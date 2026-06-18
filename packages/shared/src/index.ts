@@ -6,5 +6,6 @@ export * from './types/collision.js';
 export * from './types/movement.js';
 export * from './constants/game.js';
 export * from './constants/network.js';
+export * from './constants/damage-formulas.js';
 export * from './validation/schemas.js';
 export * from './utils/helpers.js';

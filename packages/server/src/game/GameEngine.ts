@@ -1,6 +1,7 @@
 import { World } from './World.js';
 import { logger } from '../utils/logger.js';
 import type { MovementSystem } from './systems/MovementSystem.js';
+import type { CombatSystem } from './systems/CombatSystem.js';
 
 export class GameEngine {
   private world: World;
@@ -9,6 +10,7 @@ export class GameEngine {
   private running: boolean = false;
   private tickCount: number = 0;
   private movementSystem: MovementSystem | null = null;
+  private combatSystem: CombatSystem | null = null;
 
   constructor(world: World, tickRate: number = 100) {
     this.world = world;
@@ -51,6 +53,14 @@ export class GameEngine {
 
   getMovementSystem(): MovementSystem | null {
     return this.movementSystem;
+  }
+
+  setCombatSystem(cs: CombatSystem): void {
+    this.combatSystem = cs;
+  }
+
+  getCombatSystem(): CombatSystem | null {
+    return this.combatSystem;
   }
 
   private tick(): void {
