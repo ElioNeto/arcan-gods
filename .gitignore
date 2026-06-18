@@ -144,3 +144,8 @@ vite.config.ts.timestamp-*
 
 
 .teamcode
+# Assets - original source files (already organized in client/public/assets/)
+/assets/*/
+/assets/zip/
+/assets/*.zip
+/assets
