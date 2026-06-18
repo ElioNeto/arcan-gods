@@ -5,58 +5,67 @@ import { LoginSchema, RegisterSchema } from '@arcan-gods/shared';
 import { logger } from '../../utils/logger.js';
 import { World } from '../../game/World.js';
 import { Player } from '../../game/entities/Player.js';
+import { AuthService } from '../../services/AuthService.js';
 
-export function handleAuth(
+export async function handleAuth(
   ws: WebSocket,
   socketData: SocketData,
   packet: ClientPacket & { type: 'AUTH_LOGIN' | 'AUTH_REGISTER' },
   world: World
-): void {
+): Promise<void> {
   if (packet.type === 'AUTH_LOGIN') {
-    handleLogin(ws, socketData, packet, world);
+    await handleLogin(ws, socketData, packet, world);
   } else {
-    handleRegister(ws, socketData, packet, world);
+    await handleRegister(ws, socketData, packet, world);
   }
 }
 
-function handleLogin(
+async function handleLogin(
   ws: WebSocket,
   socketData: SocketData,
   packet: ClientPacket & { type: 'AUTH_LOGIN' },
   world: World
-): void {
+): Promise<void> {
   const parsed = LoginSchema.safeParse({ email: packet.email, password: packet.password });
   if (!parsed.success) {
     sendError(ws, 'Invalid login data: ' + parsed.error.errors.map((e) => e.message).join(', '));
     return;
   }
 
-  // For now, accept any valid-format login with a test player
-  // TODO: Integrate with PostgreSQL in P1.1
-  const player = new Player(packet.email.split('@')[0] || 'Player', 'dark_knight');
+  // Try real auth, fallback to dev mode if DB unavailable
+  let result;
+  try {
+    result = await AuthService.login(packet.email, packet.password);
+  } catch (err: any) {
+    logger.warn('Auth DB unavailable, using dev mode', { error: err.message });
+    // Dev mode fallback
+    const player = new Player(packet.email.split('@')[0] || 'Player', 'dark_knight');
+    player.socketId = socketData.id;
+    world.addPlayer(player);
+    sendSuccess(ws, 'dev-token-' + player.id, player, world);
+    return;
+  }
+
+  if (!result.success) {
+    sendError(ws, result.error || 'Login failed');
+    return;
+  }
+
+  // Create player entity for authenticated user
+  const player = new Player(result.account!.username, 'dark_knight');
   player.socketId = socketData.id;
   world.addPlayer(player);
 
-  const successPacket: ServerPacket = {
-    type: 'AUTH_SUCCESS',
-    token: 'test-token-' + player.id,
-    player: player.toJSON(),
-  };
-  sendMessage(ws, successPacket);
-
-  // Send world state after successful auth
-  const worldStatePacket = world.getWorldStatePacket(player.mapId);
-  sendMessage(ws, worldStatePacket);
-
+  sendSuccess(ws, result.token!, player, world);
   logger.info('Player logged in', { playerId: player.id, name: player.name });
 }
 
-function handleRegister(
+async function handleRegister(
   ws: WebSocket,
   socketData: SocketData,
   packet: ClientPacket & { type: 'AUTH_REGISTER' },
   world: World
-): void {
+): Promise<void> {
   const parsed = RegisterSchema.safeParse({
     email: packet.email,
     password: packet.password,
@@ -67,24 +76,44 @@ function handleRegister(
     return;
   }
 
-  // For now, auto-login on register
-  // TODO: Store in PostgreSQL in P1.1
-  const player = new Player(packet.username, 'dark_knight');
+  // Try real register, fallback to dev mode
+  let result;
+  try {
+    result = await AuthService.register(packet.email, packet.username, packet.password);
+  } catch (err: any) {
+    logger.warn('Auth DB unavailable, using dev mode', { error: err.message });
+    const player = new Player(packet.username, 'dark_knight');
+    player.socketId = socketData.id;
+    world.addPlayer(player);
+    sendSuccess(ws, 'dev-token-' + player.id, player);
+    return;
+  }
+
+  if (!result.success) {
+    sendError(ws, result.error || 'Registration failed');
+    return;
+  }
+
+  const player = new Player(result.account!.username, 'dark_knight');
   player.socketId = socketData.id;
   world.addPlayer(player);
 
+  sendSuccess(ws, result.token!, player);
+  logger.info('Player registered', { playerId: player.id, name: player.name });
+}
+
+function sendSuccess(ws: WebSocket, token: string, player: Player, world?: World): void {
   const successPacket: ServerPacket = {
     type: 'AUTH_SUCCESS',
-    token: 'test-token-' + player.id,
+    token,
     player: player.toJSON(),
   };
   sendMessage(ws, successPacket);
 
-  // Send world state after successful registration
-  const worldStatePacket = world.getWorldStatePacket(player.mapId);
-  sendMessage(ws, worldStatePacket);
-
-  logger.info('Player registered', { playerId: player.id, name: player.name });
+  if (world) {
+    const worldStatePacket = world.getWorldStatePacket(player.mapId);
+    sendMessage(ws, worldStatePacket);
+  }
 }
 
 function sendMessage(ws: WebSocket, packet: ServerPacket): void {

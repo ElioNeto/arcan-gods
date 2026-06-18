@@ -8,6 +8,9 @@ import { MapManager } from './game/tilemap/MapManager.js';
 import { CollisionSystem } from './game/systems/CollisionSystem.js';
 import { MovementSystem } from './game/systems/MovementSystem.js';
 import { CombatSystem } from './game/systems/CombatSystem.js';
+import { runMigrations } from './db/migrate.js';
+import { closePool } from './db/connection.js';
+import { seed } from './db/seed/index.js';
 
 const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
@@ -42,8 +45,17 @@ const MONSTER_TEMPLATES: MonsterTemplate[] = [
   },
 ];
 
-function main(): void {
+async function main(): Promise<void> {
   logger.info('Arcan Gods Server starting', { version: '0.1.0' });
+
+  // Try to initialize database (fail gracefully for dev mode)
+  try {
+    await runMigrations();
+    await seed();
+    logger.info('Database initialized');
+  } catch (err: any) {
+    logger.warn('Database unavailable, running in dev mode', { error: err.message });
+  }
 
   // Initialize world
   const world = new World();
@@ -87,6 +99,7 @@ function main(): void {
     logger.info('Shutdown signal received', { signal });
     engine.stop();
     await server.stop();
+    try { await closePool(); } catch {}
     process.exit(0);
   };
 
@@ -100,4 +113,7 @@ function main(): void {
   });
 }
 
-main();
+main().catch((err) => {
+  logger.error('Fatal error', { error: err.message });
+  process.exit(1);
+});

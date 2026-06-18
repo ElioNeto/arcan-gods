@@ -15,7 +15,7 @@
 - [x] Servidor Node.js + WebSocket aceita conexão
 - [x] Tilemap carregado de JSON (Tiled) e renderizado
 - [x] Cliente envia clique, servidor move entidade com A*
-- [ ] ~~Login JWT funcional com PostgreSQL~~ → ⏳ Pendente (#53)
+- [x] Login JWT funcional com PostgreSQL (bcrypt + JWT + migrations)
 - [ ] ~~CI passa (lint + build + testes unitários)~~ → ⏳ Pendente (#54)
 - [x] docker-compose levanta o stack inteiro
 
@@ -24,7 +24,7 @@
 - [x] Setup servidor (Node.js + TS + WebSocket)
 - [x] Setup cliente (Vite + PixiJS + TS)
 - [x] Tilemap loader
-- [ ] Auth (JWT + PostgreSQL) → ⏳ #53
+- [x] Auth (JWT + PostgreSQL) — bcrypt + JWT + migrations + seed
 - [ ] CI pipeline → ⏳ #54
 - [x] Docker Compose
 
@@ -129,7 +129,7 @@ Cada milestone vira uma **Milestone no GitHub Projects**. As issues são associa
 
 | Milestone | Status | Issues fechadas | Issues abertas |
 |-----------|--------|:---------------:|:--------------:|
-| M1: Conexão | ✅ Completo | 6/7 | 2 (#53, #54) |
+| M1: Conexão | ✅ Completo | 8/9 | 1 (#54) |
 | M2: Movimento | ✅ Completo | 5/7 | 2 (#47, #48) |
 | M3: Combate | 🟡 Parcial | 5/10 | 5 |
 | M4: Inventário | ⏳ | 0/7 | 7 |
