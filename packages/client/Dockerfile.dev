@@ -9,8 +9,9 @@ WORKDIR /app
 # Copy root workspace config + lockfile for reproducible installs
 COPY package.json package-lock.json tsconfig.base.json ./
 
-# Copy all workspace package configs
+# Copy ALL workspace package.json files (npm ci needs them all)
 COPY packages/shared/package.json packages/shared/
+COPY packages/server/package.json packages/server/
 COPY packages/client/package.json packages/client/
 
 # Install ALL workspace dependencies (includes zod from shared)

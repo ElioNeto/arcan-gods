@@ -10,10 +10,9 @@ WORKDIR /app
 # Copy root workspace config + lockfile
 COPY package.json package-lock.json tsconfig.base.json ./
 
-# Copy shared package (needed for build)
-COPY packages/shared/ packages/shared/
-
-# Copy client package config
+# Copy ALL workspace package.json files (npm ci needs them all)
+COPY packages/shared/package.json packages/shared/
+COPY packages/server/package.json packages/server/
 COPY packages/client/package.json packages/client/
 
 # Install ALL workspace dependencies
