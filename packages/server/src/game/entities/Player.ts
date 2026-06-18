@@ -38,8 +38,8 @@ export class Player {
     this.maxMp = GAME_CONSTANTS.BASE_MP;
     this.mp = this.maxMp;
     this.mapId = 'lorencia';
-    this.x = 100;
-    this.y = 100;
+    this.x = 25;
+    this.y = 20;
     this.direction = 'down';
     this.online = true;
     this.socketId = null;

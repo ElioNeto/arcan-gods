@@ -97,7 +97,7 @@ function routePacket(ws: WebSocket, socketData: SocketData, packet: ClientPacket
   }
 }
 
-const MAX_MOVE_DISTANCE = 5; // tiles per move packet
+const MAX_MOVE_DISTANCE = 5; // tiles per move packet (for initial validation)
 
 function handlePlayerMove(ws: WebSocket, socketData: SocketData, packet: ClientPacket & { type: 'PLAYER_MOVE' }, world: World): void {
   const player = world.getPlayerBySocket(socketData.id);
@@ -106,27 +106,48 @@ function handlePlayerMove(ws: WebSocket, socketData: SocketData, packet: ClientP
     return;
   }
 
-  // Validate coordinates with Zod schema
-  const parsed = MoveSchema.safeParse({ x: packet.x, y: packet.y });
+  // Validate destination with Zod schema
+  const parsed = MoveSchema.safeParse({ destX: packet.destX, destY: packet.destY });
   if (!parsed.success) {
     sendMessage(ws, {
       type: 'ERROR',
-      message: 'Invalid coordinates: ' + parsed.error.errors.map(e => e.message).join(', '),
+      message: 'Invalid destination: ' + parsed.error.errors.map(e => e.message).join(', '),
       code: 'MOVE_INVALID',
     });
     return;
   }
 
-  // Anti-teleport validation: client can't move more than MAX_MOVE_DISTANCE per packet
-  const dx = Math.abs(packet.x - player.x);
-  const dy = Math.abs(packet.y - player.y);
+  // Delegate to MovementSystem if available, otherwise do basic teleport
+  if (world.getMovementSystem()) {
+    const result = world.getMovementSystem()!.startPlayerMove(player.id, packet.destX, packet.destY);
+    if (!result.success) {
+      sendMessage(ws, {
+        type: 'ERROR',
+        message: result.error || 'Cannot move to destination',
+        code: 'MOVE_FAILED',
+      });
+      return;
+    }
+    if (result.path && result.path.length > 0) {
+      const pathPacket: ServerPacket = {
+        type: 'PLAYER_PATH',
+        id: player.id,
+        path: result.path,
+      };
+      sendMessage(ws, pathPacket);
+    }
+    return;
+  }
+
+  // Fallback: basic teleport with validation (legacy)
+  const dx = Math.abs(packet.destX - player.x);
+  const dy = Math.abs(packet.destY - player.y);
   if (dx > MAX_MOVE_DISTANCE || dy > MAX_MOVE_DISTANCE) {
     sendMessage(ws, {
       type: 'ERROR',
       message: 'Movement rejected: distance too large (possible speedhack)',
       code: 'MOVE_TOO_FAR',
     });
-    // Send current position to correct client
     const correctionPacket: ServerPacket = {
       type: 'PLAYER_MOVED',
       id: player.id,
@@ -138,21 +159,8 @@ function handlePlayerMove(ws: WebSocket, socketData: SocketData, packet: ClientP
     return;
   }
 
-  // Validate coordinates are within map bounds (0-255 for now)
-  if (packet.x < 0 || packet.x > 255 || packet.y < 0 || packet.y > 255) {
-    sendMessage(ws, {
-      type: 'ERROR',
-      message: 'Movement rejected: out of bounds',
-      code: 'MOVE_OUT_OF_BOUNDS',
-    });
-    return;
-  }
-
-  player.x = packet.x;
-  player.y = packet.y;
-
-  // TODO: Broadcast to other players in the same map
-  // This will be implemented with proper socket tracking
+  player.x = packet.destX;
+  player.y = packet.destY;
 
   const movedPacket: ServerPacket = {
     type: 'PLAYER_MOVED',

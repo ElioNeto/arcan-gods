@@ -79,6 +79,13 @@ export class Server {
     }, SERVER_CONSTANTS.HEARTBEAT_INTERVAL);
   }
 
+  /**
+   * Exposes the WebSocketServer instance for broadcast operations.
+   */
+  getWss(): WebSocketServer {
+    return this.wss;
+  }
+
   start(): void {
     this.httpServer.listen(config.serverPort, () => {
       logger.info('Server listening', { port: config.serverPort, env: config.nodeEnv });

@@ -69,6 +69,6 @@ describe('Player', () => {
     expect(json.name).toBe('JSONTest');
     expect(json.class).toBe('dark_wizard');
     expect(json.type).toBe('player');
-    expect(json.x).toBe(100);
+    expect(json.x).toBe(25);
   });
 });

@@ -1,11 +1,13 @@
 import { Player } from './entities/Player.js';
 import { Monster } from './entities/Monster.js';
 import type { ServerPacket } from '@arcan-gods/shared';
+import type { MovementSystem } from './systems/MovementSystem.js';
 
 export class World {
   private players: Map<string, Player> = new Map();
   private monsters: Map<string, Monster> = new Map();
   private playerSocketMap: Map<string, string> = new Map(); // socketId -> playerId
+  private movementSystem: MovementSystem | null = null;
 
   // --- Player Management ---
 
@@ -81,6 +83,16 @@ export class World {
       mapId,
       entities: [...players, ...monsters],
     };
+  }
+
+  // --- Movement System ---
+
+  setMovementSystem(ms: MovementSystem): void {
+    this.movementSystem = ms;
+  }
+
+  getMovementSystem(): MovementSystem | null {
+    return this.movementSystem;
   }
 
   // --- Cleanup ---

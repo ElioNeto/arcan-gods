@@ -1,5 +1,6 @@
 import { World } from './World.js';
 import { logger } from '../utils/logger.js';
+import type { MovementSystem } from './systems/MovementSystem.js';
 
 export class GameEngine {
   private world: World;
@@ -7,6 +8,7 @@ export class GameEngine {
   private tickRate: number;
   private running: boolean = false;
   private tickCount: number = 0;
+  private movementSystem: MovementSystem | null = null;
 
   constructor(world: World, tickRate: number = 100) {
     this.world = world;
@@ -43,6 +45,14 @@ export class GameEngine {
     return this.tickCount;
   }
 
+  setMovementSystem(ms: MovementSystem): void {
+    this.movementSystem = ms;
+  }
+
+  getMovementSystem(): MovementSystem | null {
+    return this.movementSystem;
+  }
+
   private tick(): void {
     this.tickCount++;
 
@@ -59,6 +69,11 @@ export class GameEngine {
     for (const monster of monsters) {
       if (!monster.isAlive()) continue;
       // Basic patrol - just stand still for now, AI will be expanded later
+    }
+
+    // Update movement system (continuous movement along paths)
+    if (this.movementSystem) {
+      this.movementSystem.update(this.tickRate);
     }
   }
 }

@@ -4,6 +4,9 @@ import { World } from './game/World.js';
 import { GameEngine } from './game/GameEngine.js';
 import { Server } from './network/server.js';
 import { Monster, type MonsterTemplate } from './game/entities/Monster.js';
+import { MapManager } from './game/tilemap/MapManager.js';
+import { CollisionSystem } from './game/systems/CollisionSystem.js';
+import { MovementSystem } from './game/systems/MovementSystem.js';
 
 const MONSTER_TEMPLATES: MonsterTemplate[] = [
   {
@@ -44,11 +47,19 @@ function main(): void {
   // Initialize world
   const world = new World();
 
+  // Initialize map manager & collision system
+  const mapManager = new MapManager();
+  const collisionSystem = new CollisionSystem(mapManager, world);
+
+  // Initialize movement system
+  const movementSystem = new MovementSystem(world, mapManager, collisionSystem, { speed: 4 });
+  world.setMovementSystem(movementSystem);
+
   // Spawn test monsters in Lorencia
   MONSTER_TEMPLATES.forEach((template, index) => {
     for (let i = 0; i < 5; i++) {
-      const x = 110 + (index * 20) + (i * 3);
-      const y = 100 + (i * 3);
+      const x = 30 + (index * 5) + (i * 2);
+      const y = 25 + (i * 2);
       const monster = new Monster(template, x, y, 'lorencia');
       world.addMonster(monster);
     }
@@ -58,6 +69,7 @@ function main(): void {
 
   // Initialize game engine
   const engine = new GameEngine(world, config.tickRate);
+  engine.setMovementSystem(movementSystem);
   engine.start();
 
   // Initialize network server
