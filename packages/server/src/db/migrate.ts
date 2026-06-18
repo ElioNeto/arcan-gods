@@ -5,7 +5,7 @@ import { query } from './connection.js';
 import { logger } from '../utils/logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const MIGRATIONS_DIR = path.resolve(__dirname);
+const MIGRATIONS_DIR = path.resolve(__dirname, 'migrations');
 
 export async function runMigrations(): Promise<void> {
   // Create migrations tracking table
