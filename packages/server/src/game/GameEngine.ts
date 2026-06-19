@@ -134,11 +134,16 @@ export class GameEngine {
 
     // Regenerate stamina when player is not moving (P1.2)
     const players = this.world.getAllPlayers();
+    const updatedPlayers: string[] = [];
     for (const player of players) {
       if (player.stamina < player.maxStamina) {
+        const before = player.stamina;
         // Only regen if player is NOT actively moving
         if (!this.movementSystem?.isMoving(player.id)) {
           player.regenStamina(GAME_CONSTANTS.STAMINA_REGEN_PER_TICK);
+          if (player.stamina !== before) {
+            updatedPlayers.push(player.id);
+          }
         }
       }
     }
@@ -146,6 +151,35 @@ export class GameEngine {
     // Update movement system (continuous movement along paths)
     if (this.movementSystem) {
       this.movementSystem.update(this.tickRate);
+      // Track players that moved (position changes)
+      for (const player of players) {
+        if (this.movementSystem.isMoving(player.id) && !updatedPlayers.includes(player.id)) {
+          updatedPlayers.push(player.id);
+        }
+      }
+    }
+
+    // Broadcast ENTITY_UPDATE for changed players (#62 fix)
+    if (this.server && updatedPlayers.length > 0) {
+      for (const playerId of updatedPlayers) {
+        const player = this.world.getPlayer(playerId);
+        if (player && player.online) {
+          this.server.broadcastToMap(player.mapId, {
+            type: 'ENTITY_UPDATE',
+            entity: {
+              id: player.id,
+              type: 'player' as const,
+              x: player.x,
+              y: player.y,
+              hp: player.hp,
+              maxHp: player.maxHp,
+              stamina: player.stamina,
+              maxStamina: player.maxStamina,
+              direction: player.direction,
+            },
+          } as any);
+        }
+      }
     }
   }
 }

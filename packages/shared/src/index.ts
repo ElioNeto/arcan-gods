@@ -9,4 +9,5 @@ export * from './constants/game.js';
 export * from './constants/network.js';
 export * from './constants/damage-formulas.js';
 export * from './validation/schemas.js';
+export * from './engines/index.js';
 export * from './utils/helpers.js';

@@ -28,6 +28,11 @@ export class Server {
     this.wss = new WebSocketServer({ server: this.httpServer, maxPayload: SERVER_CONSTANTS.MAX_MESSAGE_SIZE });
     this.setupWebSocket();
     this.startHeartbeat();
+
+    // Register broadcast callback on World so connection handlers can broadcast
+    world.setBroadcastCallback((mapId: string, packet: any) => {
+      this.broadcastToMap(mapId, packet as ServerPacket);
+    });
   }
 
   private handleHttpRequest(_req: http.IncomingMessage, res: http.ServerResponse): void {

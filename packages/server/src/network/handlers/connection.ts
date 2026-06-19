@@ -192,8 +192,8 @@ function handlePlayerAttack(ws: WebSocket, socketData: SocketData, packet: Clien
     return;
   }
 
-  // Send attack result back to the attacker
-  sendMessage(ws, {
+  // Build ENTITY_DAMAGED packet
+  const damagePacket: ServerPacket = {
     type: 'ENTITY_DAMAGED',
     attackerId: player.id,
     targetId: result.targetId!,
@@ -205,7 +205,13 @@ function handlePlayerAttack(ws: WebSocket, socketData: SocketData, packet: Clien
     killed: result.killed!,
     expGain: result.expGain,
     goldGain: result.goldGain,
-  });
+  };
+
+  // Send to attacker
+  sendMessage(ws, damagePacket);
+
+  // Broadcast to all players in the map (#63 fix)
+  world.broadcastToMap(player.mapId, damagePacket);
 }
 
 function handlePlayerChat(ws: WebSocket, socketData: SocketData, packet: ClientPacket & { type: 'PLAYER_CHAT' }, world: World): void {

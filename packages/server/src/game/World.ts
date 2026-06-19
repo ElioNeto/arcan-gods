@@ -12,6 +12,7 @@ export class World {
   private movementSystem: MovementSystem | null = null;
   private combatSystem: CombatSystem | null = null;
   private monsterAISystem: MonsterAISystem | null = null;
+  private broadcastCallback: ((mapId: string, packet: any) => void) | null = null;
 
   // --- Player Management ---
 
@@ -117,6 +118,20 @@ export class World {
 
   getMonsterAISystem(): MonsterAISystem | null {
     return this.monsterAISystem;
+  }
+
+  // --- Broadcast ---
+
+  /** Register a callback for broadcasting packets to all players in a map */
+  setBroadcastCallback(cb: (mapId: string, packet: any) => void): void {
+    this.broadcastCallback = cb;
+  }
+
+  /** Broadcast a packet to all players in a map */
+  broadcastToMap(mapId: string, packet: any): void {
+    if (this.broadcastCallback) {
+      this.broadcastCallback(mapId, packet);
+    }
   }
 
   // --- Cleanup ---
