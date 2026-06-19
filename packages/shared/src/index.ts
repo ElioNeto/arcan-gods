@@ -1,6 +1,7 @@
 export * from './types/entities.js';
 export * from './types/packets.js';
 export * from './types/enums.js';
+export * from './types/ai.js';
 export * from './types/tilemap.js';
 export * from './types/collision.js';
 export * from './types/movement.js';

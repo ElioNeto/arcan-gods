@@ -15,6 +15,11 @@ const TEST_TEMPLATE: MonsterTemplate = {
   aggroRange: 4,
   attackRange: 1,
   respawnTime: 5000,
+  attackCooldown: 2000,
+  moveSpeed: 3,
+  leashMultiplier: 2,
+  patrolRadius: 3,
+  pathRecalcInterval: 500,
 };
 
 describe('Monster', () => {

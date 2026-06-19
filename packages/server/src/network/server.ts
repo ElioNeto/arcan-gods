@@ -1,6 +1,7 @@
 import http from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import { v4 as uuid } from 'uuid';
+import type { ServerPacket } from '@arcan-gods/shared';
 import { config } from '../config/env.js';
 import { SERVER_CONSTANTS } from '../config/constants.js';
 import { logger } from '../utils/logger.js';
@@ -84,6 +85,22 @@ export class Server {
    */
   getWss(): WebSocketServer {
     return this.wss;
+  }
+
+  /**
+   * Sends a packet to all connected players currently in the given map.
+   */
+  broadcastToMap(mapId: string, packet: ServerPacket): void {
+    const data = JSON.stringify(packet);
+    this.wss.clients.forEach((ws) => {
+      if (ws.readyState !== WebSocket.OPEN) return;
+      const socketData = (ws as any).__socketData as SocketData | undefined;
+      if (!socketData) return;
+      const player = this.world.getPlayerBySocket(socketData.id);
+      if (player && player.mapId === mapId) {
+        ws.send(data);
+      }
+    });
   }
 
   start(): void {

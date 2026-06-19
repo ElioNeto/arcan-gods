@@ -22,6 +22,11 @@ const MONSTER_TEMPLATE: MonsterTemplate = {
   aggroRange: 4,
   attackRange: 1,
   respawnTime: 5000,
+  attackCooldown: 2000,
+  moveSpeed: 3,
+  leashMultiplier: 2,
+  patrolRadius: 3,
+  pathRecalcInterval: 500,
 };
 
 const HIGH_LEVEL_MONSTER: MonsterTemplate = {
@@ -275,6 +280,118 @@ describe('CombatSystem', () => {
 
       expect(result.success).toBe(true);
       expect(result.killed).toBe(false);
+    });
+  });
+
+  // ---------------------------------------------------------------
+  // processMonsterAttack — monster → player
+  // ---------------------------------------------------------------
+
+  describe('processMonsterAttack', () => {
+    it('should return error when monster does not exist', () => {
+      const player = addPlayerToWorld(world, 'player-1', 5, 5);
+      const result = combatSystem.processMonsterAttack('non-existent', player.id);
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Invalid monster or target');
+    });
+
+    it('should return error when target player does not exist', () => {
+      const monster = addMonsterToWorld(world, 'monster-1', 5, 5);
+      const result = combatSystem.processMonsterAttack(monster.id, 'non-existent');
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Invalid monster or target');
+    });
+
+    it('should return error when target player is dead', () => {
+      const monster = addMonsterToWorld(world, 'monster-1', 5, 5);
+      const player = addPlayerToWorld(world, 'player-1', 5, 5);
+      // Kill the player
+      player.takeDamage(999);
+
+      const result = combatSystem.processMonsterAttack(monster.id, player.id);
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Target is already dead');
+    });
+
+    it('should return error when monster is dead', () => {
+      const monster = addMonsterToWorld(world, 'monster-1', 5, 5);
+      const player = addPlayerToWorld(world, 'player-1', 5, 5);
+      monster.hp = 0;
+      monster.alive = false;
+
+      const result = combatSystem.processMonsterAttack(monster.id, player.id);
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Monster is dead');
+    });
+
+    it('should return error when player is out of attack range', () => {
+      const monster = addMonsterToWorld(world, 'monster-1', 5, 5);
+      const player = addPlayerToWorld(world, 'player-1', 10, 10); // dist = 10 > 1
+
+      const result = combatSystem.processMonsterAttack(monster.id, player.id);
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Target out of range');
+    });
+
+    it('should deal damage to the player based on monster template', () => {
+      const monster = addMonsterToWorld(world, 'monster-1', 5, 5);
+      const player = addPlayerToWorld(world, 'player-1', 5, 5);
+      const initialHp = player.hp;
+
+      const result = combatSystem.processMonsterAttack(monster.id, player.id);
+
+      expect(result.success).toBe(true);
+      expect(result.damage).toBeGreaterThanOrEqual(monster.template.damageMin);
+      expect(result.damage).toBeLessThanOrEqual(monster.template.damageMax);
+      expect(player.hp).toBeLessThan(initialHp);
+      expect(player.hp).toBe(initialHp - (result.damage ?? 0));
+    });
+
+    it('should return correct metadata on successful hit', () => {
+      const monster = addMonsterToWorld(world, 'monster-1', 5, 5);
+      const player = addPlayerToWorld(world, 'player-1', 5, 5);
+
+      const result = combatSystem.processMonsterAttack(monster.id, player.id);
+
+      expect(result.success).toBe(true);
+      expect(result.targetId).toBe(player.id);
+      expect(result.targetHp).toBe(player.hp);
+      expect(result.targetMaxHp).toBe(player.maxHp);
+      expect(result.isCritical).toBe(false);
+      expect(result.isBlocked).toBe(false);
+    });
+
+    it('should kill the player if damage reduces HP to 0 or below', () => {
+      const monster = addMonsterToWorld(world, 'monster-1', 5, 5, {
+        ...MONSTER_TEMPLATE,
+        damageMin: 100,
+        damageMax: 100,
+      });
+      const player = addPlayerToWorld(world, 'player-1', 5, 5);
+      // Player has 50 HP, monster deals 100 damage → kill
+      // But first set hp to exact amount
+      player.takeDamage(40); // hp = 10
+      expect(player.hp).toBe(10);
+
+      const result = combatSystem.processMonsterAttack(monster.id, player.id);
+      expect(result.success).toBe(true);
+      expect(result.killed).toBe(true);
+      expect(player.isAlive()).toBe(false);
+    });
+
+    it('should not kill the player if damage is less than remaining HP', () => {
+      const monster = addMonsterToWorld(world, 'monster-1', 5, 5, {
+        ...MONSTER_TEMPLATE,
+        damageMin: 5,
+        damageMax: 5,
+      });
+      const player = addPlayerToWorld(world, 'player-1', 5, 5);
+      // Player has 50 HP, monster deals 5 damage → not killed
+
+      const result = combatSystem.processMonsterAttack(monster.id, player.id);
+      expect(result.success).toBe(true);
+      expect(result.killed).toBe(false);
+      expect(player.isAlive()).toBe(true);
     });
   });
 });

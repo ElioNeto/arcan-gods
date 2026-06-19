@@ -1,4 +1,6 @@
 import { v4 as uuid } from 'uuid';
+import type { Waypoint } from '@arcan-gods/shared';
+import type { MonsterAIState } from '@arcan-gods/shared';
 
 export interface MonsterTemplate {
   id: string;
@@ -14,6 +16,16 @@ export interface MonsterTemplate {
   aggroRange: number;
   attackRange: number;
   respawnTime: number; // ms
+  /** Cooldown between monster attacks in ms (default 2000) */
+  attackCooldown: number;
+  /** Movement speed in tiles per second (default 3) */
+  moveSpeed: number;
+  /** Leash range multiplier = aggroRange * leashMultiplier (default 2) */
+  leashMultiplier: number;
+  /** Radius (in tiles) for idle patrol movement (default 3) */
+  patrolRadius: number;
+  /** How often to recalculate chase path in ms (default 500) */
+  pathRecalcInterval: number;
 }
 
 export class Monster {
@@ -28,8 +40,22 @@ export class Monster {
   public spawnY: number;
   public alive: boolean;
   public respawnAt: number | null;
-  public targetId: string | null;
-  public patrolPhase: number;
+
+  // --- AI State ---
+  public currentState: MonsterAIState = 'idle';
+  public lastAttackTime: number = 0;
+  /** The player the monster is currently aggro'd on */
+  public aggroTargetId: string | null = null;
+  /** Current A* path the monster is following */
+  public aiMovePath: Waypoint[] = [];
+  /** Current index in aiMovePath */
+  public aiMoveIndex: number = 0;
+  /** Fractional tile accumulator for sub-tick movement */
+  public aiMoveRemainder: number = 0;
+  /** Last time the path was recalculated (for path recalc interval) */
+  public lastPathRecalcTime: number = 0;
+  /** Last time a patrol was started */
+  public lastPatrolTime: number = 0;
 
   constructor(template: MonsterTemplate, x: number, y: number, mapId: string) {
     this.id = uuid();
@@ -43,8 +69,6 @@ export class Monster {
     this.spawnY = y;
     this.alive = true;
     this.respawnAt = null;
-    this.targetId = null;
-    this.patrolPhase = 0;
   }
 
   takeDamage(amount: number): void {
@@ -67,7 +91,19 @@ export class Monster {
     this.y = this.spawnY;
     this.alive = true;
     this.respawnAt = null;
-    this.targetId = null;
+    this.resetAI();
+  }
+
+  /** Resets AI state to initial idle (called on respawn) */
+  resetAI(): void {
+    this.currentState = 'idle';
+    this.lastAttackTime = 0;
+    this.aggroTargetId = null;
+    this.aiMovePath = [];
+    this.aiMoveIndex = 0;
+    this.aiMoveRemainder = 0;
+    this.lastPathRecalcTime = 0;
+    this.lastPatrolTime = 0;
   }
 
   isAlive(): boolean {
@@ -92,6 +128,7 @@ export class Monster {
       mapId: this.mapId,
       alive: this.alive,
       aggroRange: this.template.aggroRange,
+      currentState: this.currentState,
     };
   }
 }

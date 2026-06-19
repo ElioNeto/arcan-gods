@@ -3,6 +3,7 @@ import { Monster } from './entities/Monster.js';
 import type { ServerPacket } from '@arcan-gods/shared';
 import type { MovementSystem } from './systems/MovementSystem.js';
 import type { CombatSystem } from './systems/CombatSystem.js';
+import type { MonsterAISystem } from './systems/MonsterAISystem.js';
 
 export class World {
   private players: Map<string, Player> = new Map();
@@ -10,6 +11,7 @@ export class World {
   private playerSocketMap: Map<string, string> = new Map(); // socketId -> playerId
   private movementSystem: MovementSystem | null = null;
   private combatSystem: CombatSystem | null = null;
+  private monsterAISystem: MonsterAISystem | null = null;
 
   // --- Player Management ---
 
@@ -105,6 +107,16 @@ export class World {
 
   getCombatSystem(): CombatSystem | null {
     return this.combatSystem;
+  }
+
+  // --- Monster AI System ---
+
+  setMonsterAISystem(mas: MonsterAISystem): void {
+    this.monsterAISystem = mas;
+  }
+
+  getMonsterAISystem(): MonsterAISystem | null {
+    return this.monsterAISystem;
   }
 
   // --- Cleanup ---

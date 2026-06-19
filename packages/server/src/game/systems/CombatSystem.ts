@@ -117,4 +117,56 @@ export class CombatSystem {
       goldGain,
     };
   }
+
+  /**
+   * Processa um ataque de monstro contra um player.
+   * Usa os stats do template do monstro (damageMin/Max) para calcular dano.
+   */
+  processMonsterAttack(monsterId: string, targetPlayerId: string): AttackResult {
+    const monster = this.world.getMonster(monsterId);
+    const target = this.world.getPlayer(targetPlayerId);
+
+    if (!monster || !target) {
+      return { success: false, error: 'Invalid monster or target' };
+    }
+
+    if (!target.isAlive()) {
+      return { success: false, error: 'Target is already dead' };
+    }
+
+    if (!monster.isAlive()) {
+      return { success: false, error: 'Monster is dead' };
+    }
+
+    // Validate range (Manhattan distance)
+    const dist = Math.abs(monster.x - target.x) + Math.abs(monster.y - target.y);
+    const attackRange = monster.template.attackRange;
+    if (dist > attackRange) {
+      return { success: false, error: 'Target out of range' };
+    }
+
+    // Calculate damage from monster template stats (guard against damageMax < damageMin)
+    const dmgMin = monster.template.damageMin;
+    const dmgMax = Math.max(dmgMin, monster.template.damageMax);
+    const damage =
+      dmgMin +
+      Math.floor(Math.random() * (dmgMax - dmgMin + 1));
+
+    // Apply damage to player
+    target.takeDamage(damage);
+    const killed = !target.isAlive();
+
+    return {
+      success: true,
+      damage,
+      isCritical: false,
+      isBlocked: false,
+      targetId: target.id,
+      targetHp: target.hp,
+      targetMaxHp: target.maxHp,
+      killed,
+      expGain: 0,
+      goldGain: 0,
+    };
+  }
 }
