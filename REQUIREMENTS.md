@@ -1,6 +1,8 @@
 # Requisitos — Arcan Gods
 
-> **Status:** Atualizado · Versão 0.4 · Ciclo 04 concluído (2026-06-19) · 357 testes, 26 issues fechadas
+> **Status:** Atualizado · Versão 0.5 · Ciclo 04 concluído (2026-06-19) · 357 testes, 31 issues fechadas, 29 abertas
+>
+> **🔴 Nova prioridade:** Fase 3 — Arquitetura de Engines (Graphics, Gameplay, Story/Quests)
 
 ---
 
@@ -123,8 +125,8 @@
 | RNF-005 | Cliente 60 FPS em GPUs integradas | Média | ✅ PixiJS com RAF, aguardando benchmark |
 | RNF-006 | Asset total < 50 MB | Média | ✅ 7.3 MB (2900 sprites organizados) |
 | RNF-007 | TypeScript strict mode | Alta | ✅ tsconfig.base.json: strict: true |
-| RNF-008 | Testes unitários | Alta | ✅ 247 testes (Vitest) |
-| RNF-009 | CI/CD via GitHub Actions | Alta | ❌ Pendente (#54) |
+| RNF-008 | Testes unitários | Alta | ✅ 357 testes (Vitest) |
+| RNF-009 | CI/CD via GitHub Actions | Alta | ✅ Completo (#54) |
 | RNF-010 | Logs estruturados | Média | ✅ Logger JSON (debug/info/warn/error) |
 | RNF-011 | i18n (pt-BR, en-US) | Baixa | ❌ Futuro |
 

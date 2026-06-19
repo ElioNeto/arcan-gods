@@ -1,146 +1,143 @@
 # Roadmap — Arcan Gods
 
 > **Linha do tempo estimada.** Este roadmap é um plano vivo e será atualizado conforme o projeto avança.
-> **Atualizado:** 2026-06-18 (após 3 ciclos em 1 dia)
+> **Atualizado:** 2026-06-19 (após Ciclo 04) · **357 testes** · **31 issues fechadas**
+>
+> **🔴 Nova prioridade:** Arquitetura de Engines (Graphics, Gameplay, Story/Quests)
 
 ```
 Fase 0: Fundação         ████████████████████  100% ✅
-Fase 1: Mundo e Movim.   ████████████████████  85%  🟡
-Fase 2: Combate          ████████░░░░░░░░░░░░  40%  🟡
-Fase 3: Itens e Upgrades ░░░░░░░░░░░░░░░░░░░░  0%   ⏳
-Fase 4: Social/Quests    ░░░░░░░░░░░░░░░░░░░░  0%   ⏳
-Fase 5: Conteúdo/Polish  ░░░░░░░░░░░░░░░░░░░░  0%   ⏳
-Fase 6: Lançamento       ░░░░░░░░░░░░░░░░░░░░  0%   ⏳
+Fase 1: Movimento        ████████████████████  85%  ✅
+Fase 2: Combate          ████████████████████  100% ✅
+Fase 3: Engines          ░░░░░░░░░░░░░░░░░░░░  0%   🔴 PRIORIDADE
+Fase 4: Mundo Vivo       ░░░░░░░░░░░░░░░░░░░░  0%   ⏳
+Fase 5: Beta             ░░░░░░░░░░░░░░░░░░░░  0%   ⏳
 ```
 
 ---
 
-## ✅ Fase 0 — Fundação (Completa)
+## ✅ Fase 0 — Fundação (100%)
 
-**Status:** ✅ **100% implementado** (Ciclo 01)
 **Testes:** 54 | **Arquivos:** 58
 
-- [x] Setup do monorepo (npm workspaces)
-- [x] Servidor: setup Node.js + TypeScript + ESLint + Vitest
-- [x] Cliente: setup Vite + PixiJS + TypeScript
-- [x] WebSocket: conexão cliente-servidor com handshake JWT (mock)
-- [ ] ~~Banco: migrações PostgreSQL + schemas iniciais~~ → ⏳ #53
-- [ ] ~~Redis: sessão e cache básicos~~ → ⏳ Futuro
-- [ ] ~~Pipeline CI (lint + test + build)~~ → ⏳ #54
-- [x] Script de dev (npm run dev) + docker-compose
-- [x] Renderização: tilemap carregado de JSON (Tiled)
-- [x] Asset placeholder (quadrados coloridos + 2900 sprites craftpix)
-- **Entrega:** ✅ Cliente conecta ao servidor, vê tilemap, move com A*
+- [x] Setup monorepo (npm workspaces)
+- [x] Servidor: Node.js + TypeScript + ESLint + Vitest
+- [x] Cliente: Vite + PixiJS + TypeScript
+- [x] WebSocket: conexão com handshake JWT
+- [x] PostgreSQL: migrações + seed → ✅ #53
+- [x] CI/CD: GitHub Actions (lint + build + test) → ✅ #54
+- [x] Docker Compose para dev e produção
+- [x] Renderização de tilemap (Tiled JSON)
+- [x] Assets placeholder + 2900 sprites craftpix
 
 ---
 
-## 🟡 Fase 1 — Mundo e Movimentação (85%)
+## ✅ Fase 1 — Movimento (85%)
 
-**Status:** 🟡 **Maioria implementado** (Ciclo 02)
-**Testes:** +112 | **Total:** 206
+**Testes:** +152 | **Total:** 206
 
-- [x] Pathfinding A* no servidor (Manhattan, BinaryHeap, cache LRU)
-- [x] Movimento autoritativo (cliente envia destino, servidor calcula A* e move)
-- [x] Interpolação de movimento no cliente (MovementInterpolator)
-- [x] Colisão com tiles e objetos (CollisionGrid, sliding)
+- [x] Pathfinding A* (Manhattan, BinaryHeap, cache LRU)
+- [x] Movimento autoritativo server-side
+- [x] Interpolação de movimento no cliente
+- [x] Colisão com tiles (CollisionGrid, sliding)
 - [x] Câmera segue player com smooth scroll
-- [ ] ~~Múltiplos mapas com transição (portais)~~ → ⏳ #47
-- [x] Múltiplos jogadores visíveis simultaneamente (broadcast infra)
-- [ ] ~~Minimapa~~ → ⏳ #48
-- **Entrega:** 🟡 Jogadores andam pelo mesmo mapa, A* funcional, colisão ok. Faltam portais e minimapa.
+- [x] Broadcast infra para múltiplos jogadores
+- [ ] ~~Múltiplos mapas com portais~~ → #47
+- [ ] ~~Minimapa~~ → #48
 
 ---
 
-## 🟡 Fase 2 — Combate (40%)
+## ✅ Fase 2 — Combate (100%)
 
-**Status:** 🟡 **Núcleo implementado** (Ciclo 03)
-**Testes:** +41 | **Total:** 247
+**Testes:** +151 | **Total:** 357
 
-- [x] Sistema de atributos (STR, AGI, ENE, VIT) e fórmulas de dano
+- [x] Sistema de atributos (STR/AGI/ENE/VIT) e fórmulas de dano
 - [x] Classe Dark Knight (auto-attack via CombatSystem)
-- [ ] ~~Monstros com AI (patrulha, aggro, chase, ataque)~~ → 📌 #51
-- [x] Combate com clique (PLAYER_ATTACK → CombatSystem → ENTITY_DAMAGED)
-- [ ] ~~Animações de ataque e morte~~ → ⏳ Pendente
-- [x] Sistema de XP e level up (com stat points por nível)
-- [ ] ~~Classes adicionais (DW, Elf, SUM, MG)~~ → ⏳ Pendente
-- [ ] ~~Sistema de skills com hotkeys~~ → 📌 #52
-- [ ] ~~Efeitos visuais de skills (partículas)~~ → ⏳ Pendente
-- [ ] ~~Área segura vs. área PvP~~ → ⏳ Pendente
-- **Entrega:** 🟡 Jogador consegue dano/fórmulas/server-side. Falta AI de monstros, skills e classes.
+- [x] **Monster AI (FSM: 5 estados)** → ✅ #51
+- [x] **HUD (HP/MP/XP bars)** → ✅ #55
+- [x] **Combat Feedback (damage numbers + health bars)** → ✅ P0.3
+- [x] **Stamina (regen/consumo)** → ✅ #57
+- [x] Combate com clique (PLAYER_ATTACK)
+- [x] Sistema de XP e level up (com stat points)
+- [x] Respawn de monstros
 
 ---
 
-## ⏳ Fase 3 — Itens e Upgrades (0%)
+## 🔴 Fase 3 — Engines (0% — PRIORIDADE MÁXIMA)
 
-**Status:** ⏳ **Não iniciado**
+> **Objetivo:** Reestruturar a arquitetura em engines modulares ANTES de expandir features.
+> Cada engine substitui código espalhado por um sistema coeso e testável.
 
-- [ ] Inventário com grade drag-and-drop (8x5) → #24
-- [ ] Sistema de equipamento (armas, armaduras, acessórios) → #25
-- [ ] Drop de loot com rarity (Normal → Magic → Rare → Unique → Legend) → #22/#26
-- [ ] Sistema de upgrade (até +15, chance de falha) → #27
-- [ ] NPC loja (comprar/vender) → #28
-- [ ] Trade entre jogadores → #29
-- [ ] Sistema de wings → #30
-- [ ] Cash shop (cosméticos)
-- **Entrega:** Jogador mata monstro, dropa item, equipa, upa, troca com outros.
+### Graphics Engine (#64) — Base visual do jogo
+
+A Engine que substitui os placeholders por sprites animados, com sistema de partículas, 
+camadas de renderização e efeitos visuais.
+
+- [ ] SpriteSheet loader + AnimationController (idle/walk/attack/hurt/death)
+- [ ] Sistema de partículas (skills, damage, level up, blood)
+- [ ] Camadas de renderização com Y-sorting
+- [ ] Câmera com zoom (+/-), screen shake, bounds clamping
+- [ ] Hit flash e efeitos de morte
+- [ ] Damage numbers animados (substituir implementação atual)
+
+### Gameplay Engine (#65) — Mecânicas do jogo
+
+A Engine que unifica combate, skills, classes, loot, inventário e economia.
+
+- [ ] Skill system (Energy Ball, Twisting Slash) com MP/cooldown/damage formula
+- [ ] Class system (Dark Knight, Dark Wizard, Elf)
+- [ ] Buff/debuff system (Poison, Bless, Slow)
+- [ ] Loot system (drop tables, rarity, gold)
+- [ ] Inventory system (grade 8x5, drag-and-drop)
+- [ ] Equipment system (weapon, armor, accessories)
+- [ ] NPC shop (comprar/vender)
+- [ ] Item upgrade (+1 a +15 com chance)
+
+### Story & Quests Engine (#66) — Narrativa e progressão
+
+A Engine que traz o mundo de Arcan Gods à vida com missões, diálogos e história.
+
+- [ ] Quest system (kill/collect/talk/reach)
+- [ ] NPC dialogue tree (com condições e ações)
+- [ ] Quest log UI
+- [ ] 1 quest chain funcional (5 missões)
+- [ ] Quest rewards (XP/gold/items/skills)
+
+### Bugs críticos a corrigir junto
+- [ ] **#62** — ENTITY_UPDATE nunca enviado (bloqueia sync de stamina/HP)
+- [ ] **#63** — PLAYER_ATTACK sem broadcast (bloqueia multiplayer)
 
 ---
 
-## ⏳ Fase 4 — Social e Quests (0%)
+## ⏳ Fase 4 — Mundo Vivo (0%)
 
-**Status:** ⏳ **Não iniciado**
+**Aguardando conclusão das Engines**
 
-- Chat global, party, guild, whisper → #31
-- Party system (compartilhamento de XP) → #32
-- Guild system (criar, convidar, lista de membros) → #33
-- Quest system (kill quests, fetch quests) → #34
-- NPCs com diálogo → #35
-- Quest log → #36
-- Friends list → #37
-- **Entrega:** Jogadores formam party, completam quests, conversam, criam guild.
+- #47 Portais e transição entre mapas
+- #48 Minimapa
+- #31 Chat global/party/guild/whisper
+- #32 Party system (XP share)
+- #33 Guild system
+- #37 Friends list
+- #34-#36 Quests (expansão com quest log UI)
+- #38 Mapas completos (Lorencia, Devias, Noria)
+- #39 20+ tipos de monstro
+- #40 50+ itens únicos
 
 ---
 
-## ⏳ Fase 5 — Conteúdo e Polish (0%)
+## ⏳ Fase 5 — Beta (0%)
 
-**Status:** ⏳ **Não iniciado**
-
-- Mapa completo de Lorencia, Devias, Noria → #38
-- 20+ tipos de monstros → #39
-- 50+ itens únicos → #40
-- 15+ quests → #41
-- Efeitos sonoros e trilha sonora → #42
-- Sistema de ranking → #43
-- Suporte a mobile (layout responsivo)
-- Otimização de performance
-- Testes de carga (500+ jogadores simultâneos) → #45
+- #41 15+ quests implementadas
+- #42 Efeitos sonoros e música
+- #43 Sistema de Ranking
+- #44 Infraestrutura de produção (VPS/CDN)
+- #45 Testes de carga (500+ jogadores)
+- #46 Landing page e comunidade
+- Suporte mobile (layout responsivo)
 - i18n (pt-BR, en-US)
-- **Entrega:** Jogo jogável do começo ao mid-game.
-
----
-
-## ⏳ Fase 6 — Lançamento e Operação (0%)
-
-**Status:** ⏳ **Não iniciado**
-
-- Infraestrutura de produção (VPS/CDN) → #44
 - Domínio e SSL
-- Landing page → #46
-- Discord/community
 - Beta fechado → Beta aberto → Lançamento
-- Monitoramento e alerts
-- Iteração baseada em feedback
-- **Entrega:** Jogo no ar com comunidade ativa.
-
----
-
-## O que NÃO está no escopo (por enquanto)
-
-- Sistema de castle siege (GvG)
-- Ilusão de Tarkan, Karutan, etc. (expansões)
-- Sistema de pets
-- Jogabilidade mobile completa (nativo)
-- Blockchain/NFT — **Não e nunca**
 
 ---
 
@@ -148,11 +145,10 @@ Fase 6: Lançamento       ░░░░░░░░░░░░░░░░░░
 
 | Fase | % | Status | Testes | Issues abertas |
 |------|:-:|:------:|:------:|:--------------:|
-| F0: Fundação | 100% | ✅ | 54 | 2 (#53, #54) |
-| F1: Movimento | 85% | 🟡 | 206 | 2 (#47, #48) |
-| F2: Combate | 40% | 🟡 | 247 | 5 |
-| F3: Itens | 0% | ⏳ | — | 7 |
-| F4: Social | 0% | ⏳ | — | 7 |
-| F5: Conteúdo | 0% | ⏳ | — | 8 |
-| F6: Launch | 0% | ⏳ | — | 0 |
-| **Total** | | | **247 testes** | **30 issues** |
+| F0: Fundação | 100% | ✅ | 54 | 0 |
+| F1: Movimento | 85% | ✅ | 206 | 2 (#47, #48) |
+| F2: Combate | 100% | ✅ | 357 | 0 |
+| **F3: Engines** | **0%** | **🔴 PRIORIDADE** | — | **12** |
+| F4: Mundo Vivo | 0% | ⏳ | — | 7 |
+| F5: Beta | 0% | ⏳ | — | 8 |
+| **Total** | | | **357 testes** | **29 issues** |

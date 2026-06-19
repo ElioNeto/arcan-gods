@@ -1,7 +1,7 @@
 # Milestones — Arcan Gods
 
 > **Marcos de entrega** com critérios de aceite objetivos.
-> **Atualizado:** 2026-06-18 (após Ciclo 03)
+> **Atualizado:** 2026-06-19 (após Ciclo 04) · **Nova prioridade:** Arquitetura de Engines
 
 ---
 
@@ -20,13 +20,9 @@
 - [x] docker-compose levanta o stack inteiro
 
 ### Issues alocadas
-- [x] Setup monorepo
-- [x] Setup servidor (Node.js + TS + WebSocket)
-- [x] Setup cliente (Vite + PixiJS + TS)
-- [x] Tilemap loader
-- [x] Auth (JWT + PostgreSQL) — bcrypt + JWT + migrations + seed
-- [x] CI pipeline (GitHub Actions: lint + build + test matrix Node 20/22)
-- [x] Docker Compose
+- #1 Setup monorepo, #2 Setup servidor, #3 Setup cliente
+- #4 Tilemap loader, #5/#53 Auth JWT+PostgreSQL, #6/#54 CI pipeline
+- #7 Docker Compose, #8 shared types
 
 ---
 
@@ -36,103 +32,116 @@
 **Status:** ✅ **Concluído** (Ciclo 02)
 
 ### Critérios de aceite
-- [x] Pathfinding A* funcional no servidor (Manhattan, BinaryHeap, cache LRU)
-- [x] Movimento suave com interpolação no cliente (MovementInterpolator)
+- [x] Pathfinding A* funcional no servidor
+- [x] Movimento suave com interpolação no cliente
 - [x] Colisão com tiles (CollisionGrid, sliding)
-- [ ] ~~2+ mapas conectados por portais~~ → ⏳ Pendente (#47)
-- [x] 10+ jogadores simultâneos no mesmo mapa (broadcast infra)
-- [ ] ~~Minimapa funcionando~~ → ⏳ Pendente (#48)
+- [ ] ~~2+ mapas conectados por portais~~ → ⏳ #47
+- [x] 10+ jogadores simultâneos no mesmo mapa
+- [ ] ~~Minimapa~~ → ⏳ #48
 - [x] Câmera com smooth follow
 
-### Issues alocadas
-- [x] Pathfinding A*
-- [x] Movimento autoritativo
-- [x] Interpolação cliente
-- [x] Colisão
-- [ ] Múltiplos mapas e portais → ⏳ #47
-- [x] Câmera
-- [ ] Minimapa → ⏳ #48
+---
+
+## ✅ Milestone 3: 「Combate」 (Fase 2) — COMPLETO
+
+**Tempo real:** 2 dias (18-19/jun)
+**Status:** ✅ **Completo** (Ciclos 03 + 04)
+
+### Critérios de aceite
+- [x] Dark Knight funcional com auto-attack
+- [x] Dano calculado server-side com atributos
+- [x] XP e level up com stat points
+- [x] **AI de monstros (FSM: idle/aggro/chase/attack/return)** — ✅ #51
+- [x] **HUD com HP/MP/XP bars** — ✅ #55
+- [x] **Combat Feedback (damage numbers + health bars)** — ✅ P0.3
+- [x] **Stamina (regen/consumo)** — ✅ #57
+- [x] Respawn de monstros
+- [ ] ~~2 classes jogáveis adicionais~~ → ⏳ #65 (Gameplay Engine)
+- [ ] ~~Skills por classe~~ → ⏳ #65
+- [ ] ~~Drop de itens~~ → ⏳ #65
+
+### Métricas
+- 357 testes, 26 arquivos de teste
+- 5 features implementadas no Ciclo 04
+- 31 issues fechadas no total
 
 ---
 
-## 🟡 Milestone 3: 「Combate」 (Fase 2) — EM ANDAMENTO
+## 🔜 Milestone 4: 「Engines」 (Fase 3) — PRIORIDADE MÁXIMA
 
-**Tempo real:** 1 dia (18/jun)
-**Status:** 🟡 **Parcial** — Núcleo do combate implementado. Faltam: AI, skills, classes, loot, efeitos
+**Previsão:** Próximo ciclo
+**Status:** 🔴 **Prioridade máxima**
 
-### Critérios de aceite
-- [ ] ~~5 tipos de monstros com AI~~ → ⏳ 2 templates existem, AI (FSM chase) está pendente
-- [x] Dark Knight funcional com auto-attack (via CombatSystem)
-- [x] Dano calculado server-side com atributos (STR/AGI/ENE/VIT)
-- [x] XP e level up (com stat points por nível)
-- [ ] ~~2 classes jogáveis adicionais~~ → ⏳ Pendente
-- [ ] ~~3 skills por classe~~ → ⏳ Pendente (#52)
-- [x] Respawn de monstros (já funcionava desde Ciclo 01)
-- [ ] ~~Drop de gold e itens básicos~~ → ⏳ Gold funciona, itens pendentes
-
-### Issues alocadas
-- [ ] AI de monstros (FSM) → 📌 #51
-- [x] Sistema de combate (CombatSystem)
-- [x] Fórmulas de dano (damage-formulas.ts)
-- [x] Sistema de XP/Level (com stat points)
-- [ ] Classes: Dark Knight, Dark Wizard, Elf → ⏳ Pendente
-- [ ] Skills básicas → 📌 #52
-- [ ] Drop loot → 📌 Gold implementado, itens pendentes
-- [ ] Efeitos visuais de combate → 📌 #23 (fechada, pendente)
-
----
-
-## 🔜 Milestone 4: 「Inventário」 (Fase 3)
-
-**Previsão:** Após M3 completo
-**Status:** ⏳ **Não iniciado**
+### Objetivo
+Reestruturar a arquitetura do jogo em engines modulares antes de expandir features.
+Substituir código espalhado por engines dedicadas e bem definidas.
 
 ### Critérios de aceite
-- [ ] Grade de inventário 8x5 funcional
-- [ ] Equipamento visual no personagem
-- [ ] 10+ tipos de item com stats
-- [ ] Sistema de upgrade até +5
-- [ ] NPC loja funcional
-- [ ] Trade entre jogadores
-- [ ] Sistema de wings (visual)
 
-### Issues
-- #24 Inventário UI, #25 Equipamento, #26 Templates, #27 Upgrade, #28 NPC Shop, #29 Trade, #30 Wings
+#### Graphics Engine (#64)
+- [ ] Sistema de sprite sheets com animação (idle/walk/attack)
+- [ ] Sistema de partículas (skills, damage, level up)
+- [ ] Camadas de renderização (chão/entidades/efeitos/UI)
+- [ ] Câmera com zoom e bounds clamping
+- [ ] Hit flash em entidades ao tomar dano
+
+#### Gameplay Engine (#65)
+- [ ] Skill system base (Energy Ball + Twisting Slash)
+- [ ] Sistema de classes (DK, DW, Elf)
+- [ ] Buff/debuff system
+- [ ] Loot e drop tables
+- [ ] Inventário e equipamento
+- [ ] NPC shop
+
+#### Story & Quests Engine (#66)
+- [ ] Sistema de quests (kill/collect/talk)
+- [ ] NPC dialogue tree
+- [ ] Quest log UI
+- [ ] 1 quest chain funcional (5 missões)
+
+### Issues obrigatórias
+- **#64 Graphics Engine** — Pré-requisito para qualquer melhoria visual
+- **#65 Gameplay Engine** — Pré-requisito para skills, loot, classes
+- **#66 Story & Quests Engine** — Pré-requisito para narrativa
+
+### Bugs críticos (devem ser corrigidos junto)
+- **#62** — ENTITY_UPDATE nunca enviado (bloqueia sync de stamina/HP)
+- **#63** — PLAYER_ATTACK sem broadcast (bloqueia multiplayer)
 
 ---
 
 ## 🔜 Milestone 5: 「Mundo Vivo」 (Fase 4)
 
 **Previsão:** Após M4 completo
-**Status:** ⏳ **Não iniciado**
+**Status:** ⏳ **Aguardando**
 
 ### Issues
-- #31 Chat, #32 Party, #33 Guild, #34 Quests, #35 NPC Dialogue, #36 Quest Log, #37 Friends
+- #31 Chat, #32 Party, #33 Guild, #37 Friends
+- #47 Portais, #48 Minimapa
+- #38 Mapas, #39 Monstros, #40 Itens
 
 ---
 
-## 🔜 Milestone 6: 「Beta」 (Fase 5 + 6)
+## 🔜 Milestone 6: 「Beta」 (Fase 5)
 
 **Previsão:** Após M5 completo
-**Status:** ⏳ **Não iniciado**
+**Status:** ⏳ **Aguardando**
 
 ### Issues
-- #38 Mapas, #39 Monstros, #40 Itens, #41 Quests, #42 Som, #43 Ranking, #44 Infra, #45 Carga, #46 Landing
+- #41 Quests (expansão), #42 Som, #43 Ranking
+- #44 Infra, #45 Carga, #46 Landing
+- 50+ itens, 20+ monstros, 15+ quests
 
 ---
 
-## Acompanhamento
-
-Cada milestone vira uma **Milestone no GitHub Projects**. As issues são associadas à milestone correspondente.
-
-### Status atual dos milestones
+## 📊 Status Consolidado
 
 | Milestone | Status | Issues fechadas | Issues abertas |
-|-----------|--------|:---------------:|:--------------:|
+|-----------|:------:|:---------------:|:--------------:|
 | M1: Conexão | ✅ Completo | 9/9 | 0 |
 | M2: Movimento | ✅ Completo | 5/7 | 2 (#47, #48) |
-| M3: Combate | 🟡 Parcial | 5/10 | 5 |
-| M4: Inventário | ⏳ | 0/7 | 7 |
+| M3: Combate | ✅ Completo | 12/12 | 0 |
+| **M4: Engines** | 🔴 **Prioridade** | 0/12 | **12** |
 | M5: Mundo Vivo | ⏳ | 0/7 | 7 |
 | M6: Beta | ⏳ | 0/8 | 8 |
-| **Total** | | **26 fechadas** | **30 abertas** |
+| **Total** | | **31 fechadas** | **29 abertas** |
