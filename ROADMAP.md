@@ -103,6 +103,19 @@ A Engine que traz o mundo de Arcan Gods à vida com missões, diálogos e histó
 - [ ] 1 quest chain funcional (5 missões)
 - [ ] Quest rewards (XP/gold/items/skills)
 
+### Map Engine (#67) — Criação e gerenciamento de mapas
+
+A Engine que unifica criação, carregamento, colisão, portais e eventos de mapa.
+
+- [ ] Editor visual de mapas (ferramenta standalone no navegador)
+- [ ] 3 mapas completos (Lorencia, Devias, Noria)
+- [ ] Portais conectando mapas com transição suave
+- [ ] Spawn points configuráveis por mapa
+- [ ] Renderização por camadas (ground/walls/decoration/effects)
+- [ ] Grid de colisão gerado automaticamente
+- [ ] Música ambiente e iluminação por mapa
+- [ ] Eventos de mapa (entrada/saída, clima, batalhas)
+
 ### Bugs críticos a corrigir junto
 - [ ] **#62** — ENTITY_UPDATE nunca enviado (bloqueia sync de stamina/HP)
 - [ ] **#63** — PLAYER_ATTACK sem broadcast (bloqueia multiplayer)
@@ -148,7 +161,7 @@ A Engine que traz o mundo de Arcan Gods à vida com missões, diálogos e histó
 | F0: Fundação | 100% | ✅ | 54 | 0 |
 | F1: Movimento | 85% | ✅ | 206 | 2 (#47, #48) |
 | F2: Combate | 100% | ✅ | 357 | 0 |
-| **F3: Engines** | **0%** | **🔴 PRIORIDADE** | — | **12** |
+| **F3: Engines** | **0%** | **🔴 PRIORIDADE** | — | **13** |
 | F4: Mundo Vivo | 0% | ⏳ | — | 7 |
 | F5: Beta | 0% | ⏳ | — | 8 |
-| **Total** | | | **357 testes** | **29 issues** |
+| **Total** | | | **357 testes** | **30 issues** |

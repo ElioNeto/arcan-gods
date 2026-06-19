@@ -103,6 +103,7 @@ Substituir código espalhado por engines dedicadas e bem definidas.
 - **#64 Graphics Engine** — Pré-requisito para qualquer melhoria visual
 - **#65 Gameplay Engine** — Pré-requisito para skills, loot, classes
 - **#66 Story & Quests Engine** — Pré-requisito para narrativa
+- **#67 Map Engine** — Pré-requisito para criação de mapas e portais
 
 ### Bugs críticos (devem ser corrigidos junto)
 - **#62** — ENTITY_UPDATE nunca enviado (bloqueia sync de stamina/HP)
@@ -141,7 +142,7 @@ Substituir código espalhado por engines dedicadas e bem definidas.
 | M1: Conexão | ✅ Completo | 9/9 | 0 |
 | M2: Movimento | ✅ Completo | 5/7 | 2 (#47, #48) |
 | M3: Combate | ✅ Completo | 12/12 | 0 |
-| **M4: Engines** | 🔴 **Prioridade** | 0/12 | **12** |
+| **M4: Engines** | 🔴 **Prioridade** | 0/13 | **13** |
 | M5: Mundo Vivo | ⏳ | 0/7 | 7 |
 | M6: Beta | ⏳ | 0/8 | 8 |
-| **Total** | | **31 fechadas** | **29 abertas** |
+| **Total** | | **31 fechadas** | **30 abertas** |

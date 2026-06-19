@@ -1,8 +1,8 @@
 # Requisitos — Arcan Gods
 
-> **Status:** Atualizado · Versão 0.5 · Ciclo 04 concluído (2026-06-19) · 357 testes, 31 issues fechadas, 29 abertas
+> **Status:** Atualizado · Versão 0.5 · Ciclo 04 concluído (2026-06-19) · 357 testes, 31 issues fechadas, 30 abertas
 >
-> **🔴 Nova prioridade:** Fase 3 — Arquitetura de Engines (Graphics, Gameplay, Story/Quests)
+> **🔴 Nova prioridade:** Fase 3 — Arquitetura de Engines (Graphics, Gameplay, Story/Quests, Map)
 
 ---
 
@@ -29,6 +29,9 @@
 | RF-014 | Colisão com objetos estáticos | Alta | ✅ Ciclo 02 (CollisionSystem) |
 | RF-015 | Camadas de mapa | Média | ❌ Futuro |
 | RF-016 | Áreas seguras vs PvP | Média | ❌ Futuro |
+| RF-017 | Editor visual de mapas | Alta | ❌ Pendente (#67) |
+| RF-018 | Portais entre mapas | Alta | ❌ Pendente (#47, #67) |
+| RF-019 | Renderização por camadas | Média | ❌ Pendente (#67) |
 
 ### 1.3 Personagem
 
