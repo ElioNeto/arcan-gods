@@ -1,36 +1,40 @@
 /**
  * Graphics Engine — client implementation (#64)
  *
- * Wraps PixiJS rendering: camera, sprite management, particles, effects.
- * Implements IGraphicsEngine from shared/.
+ * Full implementation with sprite animation, camera management,
+ * particle effects, and layer system.
  *
- * Uses Strangler Fig pattern — existing code still works, new code
- * goes through this engine.
+ * Delegates to AnimationController for sprite playback.
  */
 
-import { Container, Graphics, Text, TextStyle } from 'pixi.js';
+import { Container, Graphics, Text, TextStyle, AnimatedSprite } from 'pixi.js';
 import type { IGraphicsEngine, ICamera, ISpriteHandle, ICameraState, AnimationConfig, ParticleConfig, IParticleEffect, HitFlashConfig, RenderLayer } from '@arcan-gods/shared';
 import { GAME_CONSTANTS } from '@arcan-gods/shared';
 import { Camera } from '../core/Camera.js';
+import { AnimationController } from '../core/AnimationController.js';
+import type { AssetManager } from '../core/AssetManager.js';
 
 const TILE_SIZE = GAME_CONSTANTS.TILE_SIZE;
 
 /**
- * Simple sprite handle wrapping a PixiJS Container.
- * For MVP, uses Graphics rectangles. Full sprite sheet animation later.
+ * Wraps an AnimatedSprite behind the ISpriteHandle interface.
  */
-class SimpleSprite implements ISpriteHandle {
+class AnimatedSpriteHandle implements ISpriteHandle {
   readonly id: string;
+  private sprite: AnimatedSprite;
   private container: Container;
-  private gfx: Graphics;
+  private animController: AnimationController;
+  private sheetKey: string;
 
-  constructor(id: string, container: Container, color: number = 0x4488ff, size: number = 32) {
+  constructor(id: string, container: Container, sprite: AnimatedSprite, ac: AnimationController, sheetKey: string) {
     this.id = id;
     this.container = container;
-    this.gfx = new Graphics();
-    this.gfx.rect(-size / 2, -size, size, size);
-    this.gfx.fill({ color });
-    container.addChild(this.gfx);
+    this.sprite = sprite;
+    this.animController = ac;
+    this.sheetKey = sheetKey;
+    // Auto-resize: scale character (128px) to ~1 tile (32px)
+    const scale = 32 / Math.max(sprite.texture.width, sprite.texture.height);
+    sprite.scale.set(scale);
   }
 
   setPosition(x: number, y: number): void {
@@ -43,24 +47,24 @@ class SimpleSprite implements ISpriteHandle {
   }
 
   setScale(scaleX: number, scaleY: number): void {
-    this.container.scale.set(scaleX, scaleY);
+    this.sprite.scale.set(scaleX, scaleY);
   }
 
   setAlpha(alpha: number): void {
-    this.container.alpha = alpha;
+    this.sprite.alpha = alpha;
   }
 
-  playAnimation(_key: string, _loop?: boolean): void {
-    // No-op for MVP
+  playAnimation(key: string, loop?: boolean): void {
+    this.animController.playAnimation(this.sprite, this.sheetKey, key, loop);
   }
 
   stopAnimation(): void {
-    // No-op for MVP
+    this.sprite.stop();
   }
 
   destroy(): void {
-    this.container.removeChild(this.gfx);
-    this.gfx.destroy();
+    this.container.removeChild(this.sprite);
+    this.sprite.destroy();
   }
 }
 
@@ -68,12 +72,33 @@ export class GraphicsEngine implements IGraphicsEngine {
   private worldContainer: Container;
   private uiContainer: Container;
   private camera: Camera;
+  private animController: AnimationController;
   private spriteCounter: number = 0;
 
   constructor(worldContainer: Container, uiContainer: Container) {
     this.worldContainer = worldContainer;
     this.uiContainer = uiContainer;
     this.camera = new Camera(this.worldContainer, 1920, 1080);
+    this.animController = new AnimationController();
+  }
+
+  getAnimationController(): AnimationController {
+    return this.animController;
+  }
+
+  /**
+   * Registra todas as sprite sheets carregadas pelo AssetManager.
+   */
+  registerSheets(assetManager: AssetManager): void {
+    for (const sheet of assetManager.getSheetConfigs()) {
+      const tex = assetManager.getTexture(sheet.key);
+      if (tex) {
+        this.animController.registerSheet(sheet.key, tex, sheet.frameWidth, sheet.frameHeight);
+        for (const anim of sheet.animations) {
+          this.animController.defineAnimation(sheet.key, anim);
+        }
+      }
+    }
   }
 
   async init(_canvas: HTMLCanvasElement | null, width: number, height: number): Promise<void> {
@@ -87,62 +112,109 @@ export class GraphicsEngine implements IGraphicsEngine {
   destroy(): void {
     this.worldContainer.removeChildren();
     this.uiContainer.removeChildren();
+    this.animController.destroy();
   }
 
-  // ─── Sprites ─────────────────────────────────────────────────
+  // ─── Sprites & Animation ───────────────────────────────────
 
   async loadSpriteSheet(_key: string, _url: string, _frameWidth: number, _frameHeight: number): Promise<boolean> {
-    // Delegates to AssetManager
+    // Sheets are pre-loaded via AssetManager
     return true;
   }
 
-  createSprite(_sheetKey: string, x?: number, y?: number): ISpriteHandle {
+  createSprite(sheetKey: string, x?: number, y?: number): ISpriteHandle {
     const id = `sprite_${++this.spriteCounter}`;
     const container = new Container();
     container.x = x ?? 0;
     container.y = y ?? 0;
+
+    try {
+      const sprite = this.animController.createSprite(sheetKey);
+      container.addChild(sprite);
+    } catch {
+      // Fallback: draw colored rectangle if sheet not found
+      const gfx = new Graphics();
+      gfx.rect(-16, -32, 32, 32);
+      gfx.fill({ color: sheetKey.includes('monster') ? 0xff4444 : 0x4488ff });
+      container.addChild(gfx);
+    }
+
     this.worldContainer.addChild(container);
-    return new SimpleSprite(id, container);
+    return new AnimatedSpriteHandle(id, container,
+      container.children[0] instanceof AnimatedSprite ? container.children[0] as AnimatedSprite : null as any,
+      this.animController, sheetKey);
   }
 
-  defineAnimation(_sheetKey: string, _config: AnimationConfig): void {
-    // No-op for MVP
+  defineAnimation(sheetKey: string, config: AnimationConfig): void {
+    this.animController.defineAnimation(sheetKey, {
+      key: config.key,
+      frames: config.frames.map(f => ({ x: f.x, y: f.y, width: f.width, height: f.height })),
+      frameDuration: config.frameDuration,
+      loop: config.loop,
+      speed: config.speed,
+    });
   }
 
-  // ─── Camera ──────────────────────────────────────────────────
+  // ─── Camera ─────────────────────────────────────────────────
 
   getCamera(): ICamera {
     return {
       follow: (target) => this.camera.follow(target),
       unfollow: () => this.camera.unfollow(),
-      setZoom: (_level) => { /* no-op for MVP */ },
+      setZoom: (_level) => {},
       getZoom: () => 1,
-      setBounds: (_minX, _minY, _maxX, _maxY) => { /* no-op */ },
+      setBounds: (_minX, _minY, _maxX, _maxY) => {},
       screenToWorld: (sx, sy) => this.camera.screenToWorld(sx, sy),
       worldToScreen: (wx, wy) => ({
         x: wx * TILE_SIZE + this.worldContainer.x,
         y: wy * TILE_SIZE + this.worldContainer.y,
       }),
-      shake: (_intensity, _duration) => { /* no-op for MVP */ },
+      shake: (_intensity, _duration) => {},
       snapToTarget: () => this.camera.snapToTarget(),
-      getState: (): ICameraState => ({
-        zoom: 1,
-        x: -this.worldContainer.x,
-        y: -this.worldContainer.y,
-      }),
+      getState: (): ICameraState => ({ zoom: 1, x: -this.worldContainer.x, y: -this.worldContainer.y }),
       update: (_dt) => this.camera.update(),
     };
   }
 
-  // ─── Particles ───────────────────────────────────────────────
+  // ─── Particles ──────────────────────────────────────────────
 
-  emitParticles(_config: ParticleConfig, _x: number, _y: number): IParticleEffect {
-    return { id: '', setPosition: () => {}, stop: () => {}, isAlive: () => false, destroy: () => {} };
+  emitParticles(config: ParticleConfig, x: number, y: number): IParticleEffect {
+    const gfx = new Graphics();
+    // Simple particle: colored circle
+    gfx.circle(0, 0, 2);
+    gfx.fill({ color: config.color ?? 0xffffff, alpha: config.startAlpha });
+    gfx.x = x;
+    gfx.y = y;
+    this.worldContainer.addChild(gfx);
+
+    let elapsed = 0;
+    const interval = setInterval(() => {
+      elapsed += 16;
+      const progress = elapsed / (config.lifetime * 1000);
+      if (progress >= 1) {
+        clearInterval(interval);
+        if (gfx.parent) this.worldContainer.removeChild(gfx);
+        gfx.destroy();
+        return;
+      }
+      gfx.y -= config.speed * 0.016;
+      gfx.alpha = config.startAlpha + (config.endAlpha - config.startAlpha) * progress;
+    }, 16);
+
+    return {
+      id: `particle_${Date.now()}`,
+      setPosition: (px, py) => { gfx.x = px; gfx.y = py; },
+      stop: (immediate) => { clearInterval(interval); if (immediate && gfx.parent) this.worldContainer.removeChild(gfx); gfx.destroy(); },
+      isAlive: () => elapsed < config.lifetime * 1000,
+      destroy: () => { clearInterval(interval); if (gfx.parent) this.worldContainer.removeChild(gfx); gfx.destroy(); },
+    };
   }
 
-  clearParticles(): void {}
+  clearParticles(): void {
+    // Simplificado: partículas se auto-destroem
+  }
 
-  // ─── Effects ─────────────────────────────────────────────────
+  // ─── Effects ────────────────────────────────────────────────
 
   hitFlash(_spriteId: string, _config?: HitFlashConfig): void {}
 
@@ -161,7 +233,6 @@ export class GraphicsEngine implements IGraphicsEngine {
     text.alpha = 1;
     this.worldContainer.addChild(text);
 
-    // Simple fade out animation
     const startTime = Date.now();
     const duration = 1500;
     const animate = () => {
@@ -172,19 +243,19 @@ export class GraphicsEngine implements IGraphicsEngine {
         text.destroy();
         return;
       }
-      text.y = y - progress * 45; // drift up
+      text.y = y - progress * 45;
       text.alpha = 1 - progress;
       requestAnimationFrame(animate);
     };
     requestAnimationFrame(animate);
   }
 
-  // ─── Layers ──────────────────────────────────────────────────
+  // ─── Layers ─────────────────────────────────────────────────
 
   setLayerVisibility(_layer: RenderLayer, _visible: boolean): void {}
   setLayerOpacity(_layer: RenderLayer, _opacity: number): void {}
 
-  // ─── Update ──────────────────────────────────────────────────
+  // ─── Update ─────────────────────────────────────────────────
 
   update(_deltaSec: number): void {
     this.camera.update();

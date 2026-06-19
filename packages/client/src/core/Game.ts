@@ -5,6 +5,7 @@ import { NetworkManager } from './NetworkManager.js';
 import { InputManager } from './InputManager.js';
 import { Camera } from './Camera.js';
 import { AssetManager } from './AssetManager.js';
+import { GraphicsEngine } from '../engines/GraphicsEngine.js';
 import { TilemapRenderer } from '../maps/TilemapRenderer.js';
 import { MenuScreen } from '../ui/MenuScreen.js';
 import { PlaceholderGraphics } from '../ui/PlaceholderGraphics.js';
@@ -22,6 +23,7 @@ export class Game {
   public inputManager: InputManager;
   public camera: Camera;
   public assetManager: AssetManager;
+  public graphicsEngine: GraphicsEngine;
 
   private worldContainer: Container;
   private uiContainer: Container;
@@ -51,6 +53,7 @@ export class Game {
     this.uiContainer = new Container();
     this.tilemapRenderer = new TilemapRenderer(this.worldContainer);
     this.assetManager = new AssetManager();
+    this.graphicsEngine = new GraphicsEngine(this.worldContainer, this.uiContainer);
     this.camera = new Camera(this.worldContainer, 1920, 1080);
   }
 
@@ -83,8 +86,8 @@ export class Game {
     // Initialize systems
     this.inputManager.init(canvas);
     await this.assetManager.init();
-    // Share loaded textures with PlaceholderGraphics
-    PlaceholderGraphics.setTextureCache(this.assetManager.getTextureCache());
+    // Register sprite sheets with the Graphics Engine
+    this.graphicsEngine.registerSheets(this.assetManager);
 
     // Handle resize
     window.addEventListener('resize', () => {
@@ -230,7 +233,8 @@ export class Game {
     const playerContainer = PlaceholderGraphics.createPlayer(
       playerData.x * TILE_SIZE,
       playerData.y * TILE_SIZE,
-      playerData.name
+      playerData.name,
+      this.graphicsEngine
     );
     this.worldContainer.addChild(playerContainer);
     this.playerEntities.set(playerData.id, playerContainer);
@@ -285,7 +289,8 @@ export class Game {
       const container = PlaceholderGraphics.createMonster(
         entity.x * TILE_SIZE,
         entity.y * TILE_SIZE,
-        entity.name
+        entity.name,
+        this.graphicsEngine
       );
       this.worldContainer.addChild(container);
       this.playerEntities.set(entity.id, container);
@@ -350,6 +355,8 @@ export class Game {
       // Update combat feedback animations (damage numbers, etc.)
       this.combatFeedbackManager?.update(deltaSec);
 
+      // Update graphics engine (camera, animations)
+      this.graphicsEngine.update(deltaSec);
       this.camera.update();
     }
 
