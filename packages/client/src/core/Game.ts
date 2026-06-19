@@ -1,5 +1,6 @@
 import { Application, Container } from 'pixi.js';
 import type { IPlayer } from '@arcan-gods/shared';
+import { GAME_CONSTANTS } from '@arcan-gods/shared';
 import { NetworkManager } from './NetworkManager.js';
 import { InputManager } from './InputManager.js';
 import { Camera } from './Camera.js';
@@ -10,6 +11,8 @@ import { PlaceholderGraphics } from '../ui/PlaceholderGraphics.js';
 import { MovementInterpolator } from '../systems/MovementInterpolator.js';
 import { HUD } from '../ui/hud/HUD.js';
 import { CombatFeedbackManager } from '../ui/combat/CombatFeedbackManager.js';
+
+const TILE_SIZE = GAME_CONSTANTS.TILE_SIZE;
 
 export type GameState = 'loading' | 'menu' | 'world';
 
@@ -223,10 +226,10 @@ export class Game {
     // Request map data for the current map
     this.networkManager.send({ type: 'REQUEST_MAP_DATA' });
 
-    // Create local player
+    // Create local player (positions are in tiles — multiply by TILE_SIZE for pixel coords)
     const playerContainer = PlaceholderGraphics.createPlayer(
-      playerData.x,
-      playerData.y,
+      playerData.x * TILE_SIZE,
+      playerData.y * TILE_SIZE,
       playerData.name
     );
     this.worldContainer.addChild(playerContainer);
@@ -262,8 +265,8 @@ export class Game {
 
     const existing = this.playerEntities.get(entity.id);
     if (existing) {
-      existing.x = entity.x;
-      existing.y = entity.y;
+      existing.x = entity.x * TILE_SIZE;
+      existing.y = entity.y * TILE_SIZE;
 
       // Update combat feedback health bar position and HP
       this.combatFeedbackManager?.updateEntityPosition(entity.id, entity.x, entity.y);
@@ -280,8 +283,8 @@ export class Game {
       }
     } else if (entity.type === 'monster') {
       const container = PlaceholderGraphics.createMonster(
-        entity.x,
-        entity.y,
+        entity.x * TILE_SIZE,
+        entity.y * TILE_SIZE,
         entity.name
       );
       this.worldContainer.addChild(container);
@@ -303,8 +306,11 @@ export class Game {
   private updateEntityPosition(id: string, x: number, y: number): void {
     const container = this.playerEntities.get(id);
     if (container) {
-      container.x = x;
-      container.y = y;
+      // x/y from server are in tiles — convert to pixels
+      container.x = x * TILE_SIZE;
+      container.y = y * TILE_SIZE;
+      // Update combat feedback positions
+      this.combatFeedbackManager?.updateEntityPosition(id, container.x, container.y);
     }
   }
 

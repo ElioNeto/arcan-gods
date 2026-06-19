@@ -1,21 +1,31 @@
 import type { Waypoint } from '@arcan-gods/shared';
+import { GAME_CONSTANTS } from '@arcan-gods/shared';
+
+const TILE_SIZE = GAME_CONSTANTS.TILE_SIZE;
 
 interface InterpolationState {
-  path: Waypoint[];
+  path: Waypoint[];        // path in TILE coordinates
+  pixelPath: Array<{ x: number; y: number }>; // path in PIXEL coordinates (tile * TILE_SIZE)
   currentIndex: number;
-  progress: number; // 0 to 1 between current waypoint and next
-  speed: number; // tiles per second
+  progress: number;         // 0 to 1 between current waypoint and next
+  speed: number;            // tiles per second
   active: boolean;
 }
 
 export class MovementInterpolator {
   private entities: Map<string, InterpolationState> = new Map();
 
-  /** Inicia interpolação para uma entidade */
+  /** Inicia interpolação para uma entidade com path em TILE coordinates */
   startPath(entityId: string, path: Waypoint[], speed: number = 4): void {
     if (path.length < 2) return;
+    // Convert tile path to pixel positions
+    const pixelPath = path.map(wp => ({
+      x: wp.x * TILE_SIZE,
+      y: wp.y * TILE_SIZE,
+    }));
     this.entities.set(entityId, {
       path,
+      pixelPath,
       currentIndex: 0,
       progress: 0,
       speed,
@@ -28,7 +38,7 @@ export class MovementInterpolator {
     for (const [, state] of this.entities) {
       if (!state.active) continue;
 
-      // Calculate distance to move this frame
+      // Calculate distance to move this frame (in tiles)
       const tilesToMove = state.speed * deltaSec;
 
       // Convert to progress (0-1 between current waypoint and next)
@@ -47,13 +57,13 @@ export class MovementInterpolator {
     }
   }
 
-  /** Obtém a posição interpolada atual de uma entidade */
+  /** Obtém a posição interpolada atual em PIXEL coordinates */
   getPosition(entityId: string): { x: number; y: number } | null {
     const state = this.entities.get(entityId);
     if (!state || !state.active) return null;
 
-    const current = state.path[state.currentIndex];
-    const next = state.path[Math.min(state.currentIndex + 1, state.path.length - 1)];
+    const current = state.pixelPath[state.currentIndex];
+    const next = state.pixelPath[Math.min(state.currentIndex + 1, state.pixelPath.length - 1)];
 
     // Only interpolate if there's a next point
     if (!next || current === next) {
