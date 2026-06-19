@@ -1,6 +1,6 @@
 # Arquitetura — Arcan Gods
 
-> **Status:** Rascunho inicial · Versão 0.1
+> **Status:** Atualizado · Versão 0.2 · Ciclo 04: Monster AI + HUD + Combat Feedback + Stamina
 
 ---
 
@@ -193,9 +193,89 @@ Guild
 - Sanitização de input em chat e comandos
 - Anti-speedhack: servidor valida timestamps de movimento
 
+## 7. Sistemas Adicionados no Ciclo 04
+
+### 7.1 Monster AI (Server)
+
+```
+Server Tick (100ms) — MonsterAISystem.update()
+  │
+  ├── Stagger: processa 1/3 dos monstros por tick (3 grupos)
+  │
+  └── Para cada monstro: MonsterFSM.update()
+        │
+        ├── IDLE  → scan players no aggroRange
+        │           ├── player encontrado → AGGRO
+        │           └── sem player → patrol idle (3-5s)
+        │
+        ├── AGGRO → calcula path A* para o alvo → CHASE
+        │
+        ├── CHASE → recálculo de path a cada 500ms
+        │           ├── dist ≤ attackRange → ATTACK
+        │           ├── dist > leash → RETURN
+        │           └── target morto → RETURN
+        │
+        ├── ATTACK → cooldown respeitado?
+        │           ├── sim → processMonsterAttack() + broadcast
+        │           └── não → idle até cooldown
+        │
+        └── RETURN → path A* para spawn
+                      ├── chegou → IDLE
+                      └── player re-aggro → CHASE
+```
+
+**Arquitetura:**
+- `MonsterFSM` — máquina de estados pura, testável em isolamento (24 testes)
+- `MonsterAISystem` — orquestração com stagger e performance monitoring
+- Dados de AI no `Monster` entity: `currentState`, `aggroTargetId`, `aiPath`, `aiMoveRemainder`
+- Tipos compartilhados em `shared/src/types/ai.ts` (`MonsterAIState`, `MonsterAIConfig`)
+- Ataques processados via `CombatSystem.processMonsterAttack()` com validação server-side
+
+### 7.2 HUD (Client)
+
+```
+Client Frame (60fps) — Game.update()
+  │
+  ├── HUD.update(localPlayerData)
+  │     ├── HP Bar  (vermelho, 200×20px)
+  │     ├── MP Bar  (azul, 200×20px)
+  │     ├── XP Bar  (dourado, 200×12px)
+  │     ├── Level Text ("Lv. X")
+  │     └── Name Text
+  │
+  └── CombatFeedbackManager.update(deltaSec)
+        ├── DamageNumber[] → drift (-30px/s) + fade (1.5s)
+        └── EntityHealthBar[] → posição sync + proporção HP
+```
+
+**Arquitetura:**
+- `HUD` — container PixiJS com Graphics para barras e Text para labels
+- `DamageNumber` — Text com drift/fade lifecycle, auto-remove via isDead()
+- `EntityHealthBar` — Graphics 30×4px sobre entidades (Y_OFFSET = -8)
+- `CombatFeedbackManager` — orquestrador com container próprio, cleanup automático
+- Toda lógica é client-side (render-only), consistente com server-authoritative
+
+### 7.3 Stamina (Server-side)
+
+```
+GameEngine.tick()
+  ├── MovementSystem.update()
+  │     └── player.consumeStamina(STAMINA_COST_PER_TILE) — 1 por tile
+  │
+  └── Se player parado: player.regenStamina(STAMINA_REGEN_PER_TICK) — 1 por tick
+
+Player entity
+  ├── stamina: number (inicial: BASE_STAMINA = 100)
+  ├── maxStamina: number (inicial: 100)
+  ├── consumeStamina(amount) → clamp [0, max]
+  └── regenStamina(amount) → clamp [0, max]
+```
+
+**Nota:** Stamina é atualizada no servidor mas o packet `ENTITY_UPDATE` (que levaria os dados ao cliente) **não é enviado** — bug crítico #62.
+
 ---
 
-## 7. Escalabilidade (visão futura)
+## 8. Escalabilidade (visão futura)
 
 ```
                      ┌──────────┐

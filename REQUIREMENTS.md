@@ -1,6 +1,6 @@
 # Requisitos — Arcan Gods
 
-> **Status:** Atualizado · Versão 0.3 · Ciclo 03 concluído (2026-06-18) · 247 testes, 26 issues fechadas
+> **Status:** Atualizado · Versão 0.4 · Ciclo 04 concluído (2026-06-19) · 357 testes, 26 issues fechadas
 
 ---
 
@@ -12,7 +12,7 @@
 |----|-----------|------------|--------|
 | RF-001 | Criar conta com email + senha | Alta | ✅ Ciclo 01 (WS, dev mode) |
 | RF-002 | Login com credenciais | Alta | ✅ Ciclo 01 (WS, dev mode) |
-| RF-003 | JWT em conexão WebSocket | Alta | ⚠️ Parcial (mock, #53) |
+| RF-003 | JWT em conexão WebSocket | Alta | ✅ Completo (#53) |
 | RF-004 | Recuperar senha por email | Média | ❌ Futuro |
 | RF-005 | Deletar a própria conta | Baixa | ❌ Futuro |
 
@@ -37,7 +37,7 @@
 | RF-022 | Atributos STR/AGI/ENE/VIT | Alta | ✅ Player entity + fórmulas |
 | RF-023 | XP ao matar monstros | Alta | ✅ Ciclo 03 (CombatSystem) |
 | RF-024 | Pontos de atributo no level up | Alta | ✅ Ciclo 03 (5 pts/nível) |
-| RF-025 | HP, MP, Stamina | Alta | ⚠️ Parcial (HP/MP ok, Stamina #57) |
+| RF-025 | HP, MP, Stamina | Alta | ✅ Completo (Ciclo 04) |
 | RF-026 | Morte com perda de XP | Média | ❌ Futuro |
 
 ### 1.4 Combate
@@ -46,7 +46,7 @@
 |----|-----------|------------|--------|
 | RF-030 | Combate em tempo real | Alta | ✅ Ciclo 03 (CombatSystem + clique) |
 | RF-031 | Dano calculado no servidor | Alta | ✅ Ciclo 03 (fórmulas server-side) |
-| RF-032 | AI de monstros (aggro/chase/attack) | Alta | ⚠️ Parcial (#51) |
+| RF-032 | AI de monstros (aggro/chase/attack) | Alta | ✅ Completo (Ciclo 04) |
 | RF-033 | Respawn de monstros | Alta | ✅ Ciclo 01 (Monster.ts) |
 | RF-034 | Drop de itens, gold e XP | Alta | ⚠️ Parcial (gold/XP ok, itens #22) |
 | RF-035 | PvP em áreas específicas | Média | ❌ Futuro |
@@ -102,7 +102,7 @@
 
 | ID | Descrição | Prioridade | Status |
 |----|-----------|------------|--------|
-| RF-080 | HUD com HP/MP/XP, minimapa, hotbar | Alta | ⚠️ Parcial (#55) |
+| RF-080 | HUD com HP/MP/XP, minimapa, hotbar | Alta | ✅ Completo (Ciclo 04 — HP/MP/XP bars; minimapa/hotbar pendentes como RFs separados) |
 | RF-081 | Menu de personagem | Alta | ❌ Pendente |
 | RF-082 | Inventário arrastável | Alta | ❌ Pendente (M4) |
 | RF-083 | Notificações | Média | ❌ Pendente |

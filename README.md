@@ -5,8 +5,8 @@
 > [!WARNING]
 > Este projeto está em desenvolvimento ativo. Nada aqui está pronto para produção.
 >
-> **Ciclo atual:** Ciclo 03 — Combate (2026-06-18)
-> **Status:** 🟡 Núcleo de combate implementado — 247 testes, 26 issues fechadas, 30 abertas
+> **Ciclo atual:** Ciclo 04 — Monster AI + HUD (2026-06-19)
+> **Status:** 🟡 Monster AI, HUD, Combat Feedback e Stamina implementados — 357 testes, 26 issues fechadas
 
 ## Sobre
 
@@ -21,7 +21,7 @@ Arcan Gods é um MMORPG 2D que roda diretamente no navegador, inspirado pelo cl�
 | **Banco de dados** | PostgreSQL + Redis (configurados no Docker) |
 | **Networking** | WebSocket (JSON) |
 | **Auth** | JWT + bcrypt (placeholder, pendente PostgreSQL) |
-| **Testes** | Vitest (247 testes) |
+| **Testes** | Vitest (357 testes) |
 | **Infra** | Docker + Docker Compose |
 
 ## O que funciona
@@ -62,13 +62,23 @@ Arcan Gods é um MMORPG 2D que roda diretamente no navegador, inspirado pelo cl�
 - **Bug fixes**: Stat points no level up (RF-024)
 - **Testes**: +41 testes (total: 247)
 
+### ✅ Ciclo 04 — Monster AI + HUD + Combat Feedback + Stamina (Completo)
+
+- **Monster AI FSM** (#51): 5-state machine (idle/aggro/chase/attack/return) com stagger (1/3 por tick), pathfinding A*, patrol idle, respawn com reset de AI
+- **HUD Básico** (#55): HP/MP/XP bars com PixiJS Graphics, level/name text, safeDiv, resize handler
+- **Combat Feedback** (P0.3): Damage numbers flutuantes (drift + fade) + health bars sobre entidades, suporte a dano normal/crítico
+- **Stamina** (#57): Sistema de stamina com regen em idle (1/tick) e consumo ao mover (1/tile), clamping [0, max]
+- **ChatSchema Tests** (#58): 11 testes de validação Zod (message length, channel enum, unicode, edge cases)
+- **Testes**: 357 testes (26 arquivos), 0 falhas
+- **14 novos arquivos**, 20 modificados
+
 ### 🔄 Em desenvolvimento (próximo ciclo)
 
 | Prioridade | Feature | Issue |
 |:----------:|---------|:-----:|
-| 🔴 P0 | AI de monstros (FSM: idle/aggro/chase/attack) | #51 |
 | 🔴 P0 | Skills básicas por classe (Energy Ball, Twisting Slash) | #52 |
-| 🟡 P1 | HUD básico (HP/MP/XP bars) | #55 |
+| 🔴 P0 | ENTITY_UPDATE packet — sincronização contínua de stamina/HP/posição | #62 |
+| 🔴 P0 | PLAYER_ATTACK broadcast — damage numbers visíveis para todos | #63 |
 | 🟡 P1 | Portais e transição entre mapas | #47 |
 | 🟡 P1 | Minimapa | #48 |
 | 🟢 P2 | Auth JWT + PostgreSQL | #53 |
@@ -135,11 +145,12 @@ arcan-gods/
 │   │   └── src/
 │   │       ├── config/          # Env, constants
 │   │       ├── network/         # WebSocket server, handlers (connection, auth)
-│   │       ├── game/            # GameEngine, World, entities, tilemap, pathfinding, systems
+│   │       ├── game/            # GameEngine, World, entities, tilemap, pathfinding, systems, ai
 │   │       │   ├── tilemap/     # TilemapLoader, CollisionGrid, MapManager, maps/
 │   │       │   ├── pathfinding/ # A*, BinaryHeap, PathCache
-│   │       │   ├── systems/     # CollisionSystem, MovementSystem, CombatSystem
-│   │       │   └── entities/    # Player, Monster
+│   │       │   ├── ai/          # MonsterFSM — 5-state machine (idle/aggro/chase/attack/return)
+│   │       │   ├── systems/     # CollisionSystem, MovementSystem, CombatSystem, MonsterAISystem
+│   │       │   └── entities/    # Player (stamina), Monster (AI state)
 │   │       └── utils/           # Logger estruturado
 │   │
 │   └── client/              # Frontend PixiJS + Vite
@@ -147,20 +158,20 @@ arcan-gods/
 │           ├── core/            # Game loop, NetworkManager, InputManager, Camera, AssetManager
 │           ├── maps/            # TilemapRenderer
 │           ├── systems/         # MovementInterpolator
-│           └── ui/              # MenuScreen, PlaceholderGraphics
+│           └── ui/              # MenuScreen, PlaceholderGraphics, HUD, CombatFeedback
 │
 ├── assets/                  # Sprites fonte craftpix.net (organizados em client/public/assets/)
 ├── docs/                    # Documentação completa
 │   ├── changelog/           # Histórico de versões
-│   ├── cycle/               # Relatórios dos 3 ciclos
+│   ├── cycle/               # Relatórios dos 4 ciclos
 │   ├── development/         # Guias (setup, protocolo, arquitetura)
 │   ├── assets/              # Catálogo e missing sprites
 │   ├── gameplay/            # Lore, quests, combate, skills, itens
-│   └── tests/               # 9 planos de teste
+│   └── tests/               # 14 planos de teste
 │
 ├── package.json             # Raiz do monorepo (npm workspaces)
 ├── tsconfig.base.json       # Config TypeScript strict mode
-├── vitest.config.ts         # Config Vitest (206 testes)
+├── vitest.config.ts       # Config Vitest (357 testes)
 ├── docker-compose.yml       # Stack produção
 ├── docker-compose.dev.yml   # Stack dev com hot-reload
 └── .github/                 # GitHub Actions (pendente #54)
