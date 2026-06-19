@@ -21,7 +21,10 @@ const { MockContainer, MockGraphics } = vi.hoisted(() => {
     rect(_x: number, _y: number, _w: number, _h: number): this {
       return this;
     }
-    fill(_options: { color: number }): this {
+    circle(_x: number, _y: number, _r: number): this {
+      return this;
+    }
+    fill(_options: { color: number; alpha?: number }): this {
       return this;
     }
     destroy(): void {
@@ -61,35 +64,24 @@ describe('TilemapRenderer', () => {
     expect(r.getTileSize()).toBe(64);
   });
 
-  it('should render a 3x3 all-walkable grid', () => {
+  it('should render a 3x3 all-walkable grid (3 layers)', () => {
     const grid: boolean[][] = [
       [true, true, true],
       [true, true, true],
       [true, true, true],
     ];
     renderer.renderCollisionGrid(grid);
-    expect(container.children.length).toBe(9);
+    // Now creates 3 Graphics objects: ground + decor + path
+    expect(container.children.length).toBe(3);
   });
 
-  it('should render a mixed grid with both walkable and blocked tiles', () => {
+  it('should render a mixed grid with both walkable and blocked tiles (3 layers)', () => {
     const grid: boolean[][] = [
       [true, false],
       [false, true],
     ];
     renderer.renderCollisionGrid(grid);
-    expect(container.children.length).toBe(4);
-  });
-
-  it('should clear all tiles', () => {
-    const grid: boolean[][] = [
-      [true, true],
-      [true, true],
-    ];
-    renderer.renderCollisionGrid(grid);
-    expect(container.children.length).toBe(4);
-
-    renderer.clear();
-    expect(container.children.length).toBe(0);
+    expect(container.children.length).toBe(3);
   });
 
   it('should handle empty grid', () => {
@@ -97,7 +89,7 @@ describe('TilemapRenderer', () => {
     expect(container.children.length).toBe(0);
   });
 
-  it('should render from map data', () => {
+  it('should render from map data (3 layers)', () => {
     const mapData = {
       width: 2,
       height: 2,
@@ -108,7 +100,7 @@ describe('TilemapRenderer', () => {
       ],
     };
     renderer.renderFromMapData(mapData);
-    expect(container.children.length).toBe(4);
+    expect(container.children.length).toBe(3);
   });
 
   it('getTileSize should return correct value', () => {
@@ -122,7 +114,7 @@ describe('TilemapRenderer', () => {
     ];
     renderer.renderCollisionGrid(grid);
     const childrenBefore = container.children.length;
-    expect(childrenBefore).toBe(4);
+    expect(childrenBefore).toBeGreaterThan(0);
 
     renderer.clear();
     expect(container.children.length).toBe(0);
@@ -132,7 +124,6 @@ describe('TilemapRenderer', () => {
     renderer.renderFromMapData({
       width: 0,
       height: 0,
-      tileSize: 32,
       collisionGrid: [],
     });
     expect(container.children.length).toBe(0);

@@ -174,11 +174,18 @@ export class Game {
    * combat feedback for other entities (monsters).
    */
   private onEntityDamaged(packet: any): void {
-    // If local player was damaged, update HUD
+    // If local player was damaged, update HUD and shake camera
     if (packet.targetId === this.localPlayerId && this.localPlayerData) {
       this.localPlayerData.hp = packet.targetHp;
       this.localPlayerData.maxHp = packet.targetMaxHp;
       this.hud?.update(this.localPlayerData);
+      // Screen shake on hit
+      this.camera.shake(packet.damage > 10 ? 8 : 4, 200);
+    }
+
+    // If WE are the attacker, shake camera briefly
+    if (packet.attackerId === this.localPlayerId) {
+      this.camera.shake(3, 100);
     }
 
     // Look up entity position for combat feedback
@@ -319,26 +326,76 @@ export class Game {
     }
   }
 
+  private wasdCooldown: number = 0;
+
   private update(): void {
     if (this.state === 'world') {
       const deltaSec = this.app.ticker.deltaMS / 1000;
-
-      // Handle click-to-move
       const input = this.inputManager.getState();
-      if (input.clicked) {
-        // Convert screen coordinates to world coordinates
+
+      // ─── WASD Movement ────────────────────────────────────
+      let moveX = 0;
+      let moveY = 0;
+      if (input.keys.has('w') || input.keys.has('arrowup')) moveY = -1;
+      if (input.keys.has('s') || input.keys.has('arrowdown')) moveY = 1;
+      if (input.keys.has('a') || input.keys.has('arrowleft')) moveX = -1;
+      if (input.keys.has('d') || input.keys.has('arrowright')) moveX = 1;
+
+      this.wasdCooldown -= this.app.ticker.deltaMS;
+      if ((moveX !== 0 || moveY !== 0) && this.wasdCooldown <= 0 && this.localPlayerData) {
+        this.wasdCooldown = 150; // ms between WASD moves
+        const destX = this.localPlayerData.x + moveX;
+        const destY = this.localPlayerData.y + moveY;
+        this.networkManager.send({ type: 'PLAYER_MOVE', destX, destY });
+      }
+
+      // ─── Click-to-move ────────────────────────────────────
+      if (input.clicked && this.localPlayerData) {
         const worldPos = this.camera.screenToWorld(input.clickX, input.clickY);
         const destX = Math.round(worldPos.x);
         const destY = Math.round(worldPos.y);
-        console.debug(`[Move] Click (${input.clickX},${input.clickY}) → World (${worldPos.x.toFixed(1)},${worldPos.y.toFixed(1)}) → Dest (${destX},${destY})`);
-        // Send movement intent to server
-        this.networkManager.send({
-          type: 'PLAYER_MOVE',
-          destX,
-          destY,
-        });
+
+        // Check if click is on a monster (attack it instead of moving)
+        let clickedMonster: string | null = null;
+        for (const [id, container] of this.playerEntities) {
+          if (id === this.localPlayerId) continue;
+          const monsterTileX = Math.round(container.x / TILE_SIZE);
+          const monsterTileY = Math.round(container.y / TILE_SIZE);
+          if (destX === monsterTileX && destY === monsterTileY) {
+            clickedMonster = id;
+            break;
+          }
+        }
+
+        if (clickedMonster) {
+          this.networkManager.send({ type: 'PLAYER_ATTACK', targetId: clickedMonster });
+        } else {
+          this.networkManager.send({ type: 'PLAYER_MOVE', destX, destY });
+        }
       }
 
+      // ─── Spacebar / auto-attack nearest monster ───────────
+      if (input.keys.has(' ') && this.localPlayerData) {
+        let nearestMonster: string | null = null;
+        let nearestDist = 3; // max aggro range in tiles
+        for (const [id, container] of this.playerEntities) {
+          if (id === this.localPlayerId) continue;
+          const monsterTileX = Math.round(container.x / TILE_SIZE);
+          const monsterTileY = Math.round(container.y / TILE_SIZE);
+          const dx = monsterTileX - this.localPlayerData.x;
+          const dy = monsterTileY - this.localPlayerData.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < nearestDist) {
+            nearestDist = dist;
+            nearestMonster = id;
+          }
+        }
+        if (nearestMonster) {
+          this.networkManager.send({ type: 'PLAYER_ATTACK', targetId: nearestMonster });
+        }
+      }
+
+      // ─── Update interpolations ────────────────────────────
       this.movementInterpolator.update(deltaSec);
 
       // Apply interpolated positions to entity containers
@@ -347,15 +404,14 @@ export class Game {
         if (pos) {
           container.x = pos.x;
           container.y = pos.y;
-          // Update combat feedback positions to follow interpolated movement
           this.combatFeedbackManager?.updateEntityPosition(id, pos.x, pos.y);
         }
       }
 
-      // Update combat feedback animations (damage numbers, etc.)
+      // Update combat feedback animations
       this.combatFeedbackManager?.update(deltaSec);
 
-      // Update graphics engine (camera, animations)
+      // Update graphics engine + camera
       this.graphicsEngine.update(deltaSec);
       this.camera.update();
     }
