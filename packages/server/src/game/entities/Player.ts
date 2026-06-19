@@ -16,6 +16,8 @@ export class Player {
   public maxHp: number;
   public mp: number;
   public maxMp: number;
+  public stamina: number;
+  public maxStamina: number;
   public mapId: string;
   public x: number;
   public y: number;
@@ -37,6 +39,8 @@ export class Player {
     this.hp = this.maxHp;
     this.maxMp = GAME_CONSTANTS.BASE_MP;
     this.mp = this.maxMp;
+    this.maxStamina = GAME_CONSTANTS.BASE_STAMINA;
+    this.stamina = this.maxStamina;
     this.mapId = 'lorencia';
     this.x = 25;
     this.y = 20;
@@ -55,6 +59,16 @@ export class Player {
 
   heal(amount: number): void {
     this.hp = Math.min(this.maxHp, this.hp + amount);
+  }
+
+  regenStamina(amount: number): void {
+    if (amount <= 0) return;
+    this.stamina = Math.min(this.maxStamina, this.stamina + amount);
+  }
+
+  consumeStamina(amount: number): void {
+    if (amount <= 0) return;
+    this.stamina = Math.max(0, this.stamina - amount);
   }
 
   isAlive(): boolean {
@@ -94,6 +108,8 @@ export class Player {
       maxHp: this.maxHp,
       mp: this.mp,
       maxMp: this.maxMp,
+      stamina: this.stamina,
+      maxStamina: this.maxStamina,
       experience: this.experience,
       experienceToNext: this.experienceToNext,
       x: this.x,

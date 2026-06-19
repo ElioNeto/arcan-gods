@@ -1,4 +1,5 @@
 import type { CharacterClass, Direction, EntityType } from './enums.js';
+import type { MonsterAIState } from './ai.js';
 
 export interface IEntity {
   id: string;
@@ -17,6 +18,8 @@ export interface IPlayer extends IEntity {
   maxHp: number;
   mp: number;
   maxMp: number;
+  stamina: number;
+  maxStamina: number;
   experience: number;
   experienceToNext: number;
   direction: Direction;
@@ -31,6 +34,7 @@ export interface IMonster extends IEntity {
   maxHp: number;
   level: number;
   aggroRange: number;
+  currentState?: MonsterAIState;
 }
 
 export interface INPC extends IEntity {

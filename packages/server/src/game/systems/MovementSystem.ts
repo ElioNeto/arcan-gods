@@ -1,4 +1,4 @@
-import { type Waypoint, type Direction } from '@arcan-gods/shared';
+import { type Waypoint, type Direction, GAME_CONSTANTS } from '@arcan-gods/shared';
 import { CollisionSystem } from './CollisionSystem.js';
 import { World } from '../World.js';
 import { MapManager } from '../tilemap/MapManager.js';
@@ -145,6 +145,9 @@ export class MovementSystem {
         player.y = next.y;
         player.direction = getDirection(current.x, current.y, next.x, next.y);
         move.remainder -= 1;
+
+        // Consume stamina for each tile moved (P1.2)
+        player.consumeStamina(GAME_CONSTANTS.STAMINA_COST_PER_TILE);
       }
 
       // Check if the player has arrived at the final waypoint

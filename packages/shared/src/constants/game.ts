@@ -14,6 +14,9 @@ export const GAME_CONSTANTS = {
   MAX_GUILD_MEMBERS: 50,
   VIEW_RANGE: 15, // tiles
   ATTACK_RANGE: 2,
+  STAMINA_COST_PER_TILE: 1,
+  STAMINA_REGEN_PER_TICK: 1,
+  BASE_STAMINA: 100,
 } as const;
 
 export const XP_TABLE: number[] = [];

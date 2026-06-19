@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { GameEngine } from '../GameEngine.js';
 import { World } from '../World.js';
+import { Player } from '../entities/Player.js';
 import { Monster, type MonsterTemplate } from '../entities/Monster.js';
 
 const TEST_MONSTER_TEMPLATE: MonsterTemplate = {
@@ -17,6 +18,11 @@ const TEST_MONSTER_TEMPLATE: MonsterTemplate = {
   aggroRange: 4,
   attackRange: 1,
   respawnTime: 50, // short for testing
+  attackCooldown: 2000,
+  moveSpeed: 3,
+  leashMultiplier: 2,
+  patrolRadius: 3,
+  pathRecalcInterval: 500,
 };
 
 describe('GameEngine', () => {
@@ -71,5 +77,55 @@ describe('GameEngine', () => {
     engine.start(); // should be no-op
     expect(engine.getTickCount()).toBe(tickCount);
     engine.stop();
+  });
+
+  describe('Stamina', () => {
+    it('should regenerate stamina when player is not moving', () => {
+      const player = new Player('Test', 'dark_knight');
+      player.stamina = 80;
+      world.addPlayer(player);
+
+      engine.start();
+      vi.advanceTimersByTime(100); // 1 tick
+
+      expect(player.stamina).toBe(81);
+      engine.stop();
+    });
+
+    it('should regenerate stamina over multiple ticks', () => {
+      const player = new Player('Test', 'dark_knight');
+      player.stamina = 80;
+      world.addPlayer(player);
+
+      engine.start();
+      vi.advanceTimersByTime(300); // 3 ticks
+
+      expect(player.stamina).toBe(83);
+      engine.stop();
+    });
+
+    it('should not exceed max stamina', () => {
+      const player = new Player('Test', 'dark_knight');
+      player.stamina = 99;
+      world.addPlayer(player);
+
+      engine.start();
+      vi.advanceTimersByTime(500); // 5 ticks, would be 104 but capped at 100
+
+      expect(player.stamina).toBe(100);
+      engine.stop();
+    });
+
+    it('should not regenerate stamina when stamina is already at max', () => {
+      const player = new Player('Test', 'dark_knight');
+      player.stamina = 100;
+      world.addPlayer(player);
+
+      engine.start();
+      vi.advanceTimersByTime(200); // 2 ticks
+
+      expect(player.stamina).toBe(100);
+      engine.stop();
+    });
   });
 });
