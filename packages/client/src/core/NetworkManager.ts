@@ -1,4 +1,4 @@
-import EventEmitter from 'events';
+import { EventEmitter } from './EventEmitter.js';
 import type { ClientPacket, ServerPacket } from '@arcan-gods/shared';
 import { NETWORK_CONFIG } from '@arcan-gods/shared';
 

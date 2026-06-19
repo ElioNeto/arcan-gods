@@ -46,4 +46,12 @@ export class Camera {
   getContainer(): Container {
     return this.container;
   }
+
+  /** Converte coordenadas da tela para coordenadas do mundo (tiles) */
+  screenToWorld(screenX: number, screenY: number): { x: number; y: number } {
+    return {
+      x: screenX - this.container.x,
+      y: screenY - this.container.y,
+    };
+  }
 }

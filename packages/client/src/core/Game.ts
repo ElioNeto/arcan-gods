@@ -69,6 +69,8 @@ export class Game {
     // Initialize systems
     this.inputManager.init(canvas);
     await this.assetManager.init();
+    // Share loaded textures with PlaceholderGraphics
+    PlaceholderGraphics.setTextureCache(this.assetManager.getTextureCache());
 
     // Handle resize
     window.addEventListener('resize', () => {
@@ -298,6 +300,20 @@ export class Game {
   private update(): void {
     if (this.state === 'world') {
       const deltaSec = this.app.ticker.deltaMS / 1000;
+
+      // Handle click-to-move
+      const input = this.inputManager.getState();
+      if (input.clicked) {
+        // Convert screen coordinates to world coordinates
+        const worldPos = this.camera.screenToWorld(input.clickX, input.clickY);
+        // Send movement intent to server
+        this.networkManager.send({
+          type: 'PLAYER_MOVE',
+          destX: Math.round(worldPos.x),
+          destY: Math.round(worldPos.y),
+        });
+      }
+
       this.movementInterpolator.update(deltaSec);
 
       // Apply interpolated positions to entity containers

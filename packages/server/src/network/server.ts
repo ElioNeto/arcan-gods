@@ -70,11 +70,17 @@ export class Server {
     this.heartbeatInterval = setInterval(() => {
       this.wss.clients.forEach((ws) => {
         const socketData = (ws as any).__socketData as SocketData | undefined;
-        if (socketData && Date.now() - socketData.lastPong > SERVER_CONSTANTS.HEARTBEAT_TIMEOUT) {
+        if (!socketData) return;
+
+        // Se isAlive === false, o ping anterior não foi respondido → termina
+        if (!socketData.isAlive) {
           logger.debug('Heartbeat timeout, terminating connection', { socketId: socketData.id });
           ws.terminate();
           return;
         }
+
+        // Marca como não vivo antes do ping. O pong handler seta de volta para true.
+        socketData.isAlive = false;
         ws.ping();
       });
     }, SERVER_CONSTANTS.HEARTBEAT_INTERVAL);
