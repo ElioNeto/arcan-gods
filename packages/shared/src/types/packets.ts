@@ -2,6 +2,7 @@ import type { IEntity, IPlayer } from './entities.js';
 import type { ChatChannel, Direction } from './enums.js';
 import type { IMapData } from './tilemap.js';
 import type { Waypoint } from './movement.js';
+import type { MonsterAIState } from './ai.js';
 
 export type ClientPacket =
   | { type: 'AUTH_LOGIN'; email: string; password: string }
@@ -26,4 +27,5 @@ export type ServerPacket =
   | { type: 'ERROR'; message: string; code: string }
   | { type: 'HEARTBEAT_ACK'; timestamp: number }
   | { type: 'CONNECTED'; message: string }
-  | { type: 'ENTITY_DAMAGED'; attackerId: string; targetId: string; damage: number; isCritical: boolean; isBlocked: boolean; targetHp: number; targetMaxHp: number; killed: boolean; expGain?: number; goldGain?: number };
+  | { type: 'ENTITY_DAMAGED'; attackerId: string; targetId: string; damage: number; isCritical: boolean; isBlocked: boolean; targetHp: number; targetMaxHp: number; killed: boolean; expGain?: number; goldGain?: number }
+  | { type: 'MONSTER_AI_STATE'; monsterId: string; state: MonsterAIState; targetId?: string };

@@ -8,6 +8,7 @@ import { MapManager } from './game/tilemap/MapManager.js';
 import { CollisionSystem } from './game/systems/CollisionSystem.js';
 import { MovementSystem } from './game/systems/MovementSystem.js';
 import { CombatSystem } from './game/systems/CombatSystem.js';
+import { MonsterAISystem } from './game/systems/MonsterAISystem.js';
 import { runMigrations } from './db/migrate.js';
 import { closePool } from './db/connection.js';
 import { seed } from './db/seed/index.js';
@@ -27,6 +28,11 @@ const MONSTER_TEMPLATES: MonsterTemplate[] = [
     aggroRange: 4,
     attackRange: 1,
     respawnTime: 5000,
+    attackCooldown: 2000,
+    moveSpeed: 3,
+    leashMultiplier: 2,
+    patrolRadius: 3,
+    pathRecalcInterval: 500,
   },
   {
     id: 'spider',
@@ -42,6 +48,11 @@ const MONSTER_TEMPLATES: MonsterTemplate[] = [
     aggroRange: 5,
     attackRange: 1,
     respawnTime: 7000,
+    attackCooldown: 2000,
+    moveSpeed: 3,
+    leashMultiplier: 2,
+    patrolRadius: 3,
+    pathRecalcInterval: 500,
   },
 ];
 
@@ -84,14 +95,20 @@ async function main(): Promise<void> {
 
   logger.info('Monsters spawned', { count: MONSTER_TEMPLATES.length * 5 });
 
+  // Initialize monster AI system
+  const monsterAISystem = new MonsterAISystem(world, mapManager);
+  world.setMonsterAISystem(monsterAISystem);
+
   // Initialize game engine
   const engine = new GameEngine(world, config.tickRate);
   engine.setMovementSystem(movementSystem);
   engine.setCombatSystem(combatSystem);
+  engine.setMonsterAISystem(monsterAISystem);
   engine.start();
 
   // Initialize network server
   const server = new Server(world);
+  engine.setServer(server);
   server.start();
 
   // Graceful shutdown
