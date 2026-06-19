@@ -9,7 +9,7 @@
  */
 
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
-import type { IGraphicsEngine, ICamera, ISpriteHandle, ICameraState } from '@arcan-gods/shared';
+import type { IGraphicsEngine, ICamera, ISpriteHandle, ICameraState, AnimationConfig, ParticleConfig, IParticleEffect, HitFlashConfig, RenderLayer } from '@arcan-gods/shared';
 import { GAME_CONSTANTS } from '@arcan-gods/shared';
 import { Camera } from '../core/Camera.js';
 
@@ -105,7 +105,7 @@ export class GraphicsEngine implements IGraphicsEngine {
     return new SimpleSprite(id, container);
   }
 
-  defineAnimation(_sheetKey: string, _config: any): void {
+  defineAnimation(_sheetKey: string, _config: AnimationConfig): void {
     // No-op for MVP
   }
 
@@ -136,7 +136,7 @@ export class GraphicsEngine implements IGraphicsEngine {
 
   // ─── Particles ───────────────────────────────────────────────
 
-  emitParticles(_config: any, _x: number, _y: number): any {
+  emitParticles(_config: ParticleConfig, _x: number, _y: number): IParticleEffect {
     return { id: '', setPosition: () => {}, stop: () => {}, isAlive: () => false, destroy: () => {} };
   }
 
@@ -144,7 +144,7 @@ export class GraphicsEngine implements IGraphicsEngine {
 
   // ─── Effects ─────────────────────────────────────────────────
 
-  hitFlash(_spriteId: string, _config?: any): void {}
+  hitFlash(_spriteId: string, _config?: HitFlashConfig): void {}
 
   showDamageNumber(x: number, y: number, damage: number, isCritical?: boolean): void {
     const text = new Text({
@@ -181,8 +181,8 @@ export class GraphicsEngine implements IGraphicsEngine {
 
   // ─── Layers ──────────────────────────────────────────────────
 
-  setLayerVisibility(_layer: any, _visible: boolean): void {}
-  setLayerOpacity(_layer: any, _opacity: number): void {}
+  setLayerVisibility(_layer: RenderLayer, _visible: boolean): void {}
+  setLayerOpacity(_layer: RenderLayer, _opacity: number): void {}
 
   // ─── Update ──────────────────────────────────────────────────
 

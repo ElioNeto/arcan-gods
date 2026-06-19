@@ -9,7 +9,7 @@
  */
 
 import type {
-  IGameplayEngine, ICombatResult, ISkillConfig, IClassStats, IClassGrowth,
+  IGameplayEngine, ICombatResult, ICombatConfig, ISkillConfig, IClassStats, IClassGrowth,
   IInventorySlot, IMoveResult,
 } from '@arcan-gods/shared';
 import type { CharacterClass } from '@arcan-gods/shared';
@@ -46,7 +46,7 @@ export class GameplayEngine implements IGameplayEngine {
     return this.combatSystem.processMonsterAttack(monsterId, targetId);
   }
 
-  getCombatConfig(_entityId: string): any {
+  getCombatConfig(_entityId: string): ICombatConfig {
     return {
       baseDamageMin: 5,
       baseDamageMax: 15,

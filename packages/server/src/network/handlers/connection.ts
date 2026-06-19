@@ -207,10 +207,7 @@ function handlePlayerAttack(ws: WebSocket, socketData: SocketData, packet: Clien
     goldGain: result.goldGain,
   };
 
-  // Send to attacker
-  sendMessage(ws, damagePacket);
-
-  // Broadcast to all players in the map (#63 fix)
+  // Broadcast to all players in the map (including attacker) (#63 fix)
   world.broadcastToMap(player.mapId, damagePacket);
 }
 
