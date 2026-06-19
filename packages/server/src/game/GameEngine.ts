@@ -96,6 +96,10 @@ export class GameEngine {
       }
     }
 
+    // Track entities that changed this tick (for ENTITY_UPDATE broadcast)
+    const updatedPlayers: string[] = [];
+    const updatedMonsters: string[] = [];
+
     // Update monster AI (staggered processing)
     if (this.monsterAISystem) {
       const results = this.monsterAISystem.update(this.tickRate, this.tickCount);
@@ -116,6 +120,16 @@ export class GameEngine {
           // Broadcast ENTITY_DAMAGED to all players in the same map
           if (monster) {
             monster.lastAttackTime = Date.now();
+
+            // Track monster HP change for ENTITY_UPDATE broadcast
+            const target = this.world.getPlayer(result.targetId);
+            if (target) {
+              updatedPlayers.push(target.id);
+            }
+            if (!updatedMonsters.includes(monster.id)) {
+              updatedMonsters.push(monster.id);
+            }
+
             this.server.broadcastToMap(monster.mapId, {
               type: 'ENTITY_DAMAGED',
               attackerId: result.monsterId,
@@ -134,7 +148,6 @@ export class GameEngine {
 
     // Regenerate stamina when player is not moving (P1.2)
     const players = this.world.getAllPlayers();
-    const updatedPlayers: string[] = [];
     for (const player of players) {
       if (player.stamina < player.maxStamina) {
         const before = player.stamina;
@@ -160,7 +173,7 @@ export class GameEngine {
     }
 
     // Broadcast ENTITY_UPDATE for changed players (#62 fix)
-    if (this.server && updatedPlayers.length > 0) {
+    if (this.server) {
       for (const playerId of updatedPlayers) {
         const player = this.world.getPlayer(playerId);
         if (player && player.online) {
@@ -176,6 +189,24 @@ export class GameEngine {
               stamina: player.stamina,
               maxStamina: player.maxStamina,
               direction: player.direction,
+            },
+          } as any);
+        }
+      }
+
+      // Broadcast ENTITY_UPDATE for changed monsters (HP after monster attacks)
+      for (const monsterId of updatedMonsters) {
+        const monster = this.world.getMonster(monsterId);
+        if (monster) {
+          this.server.broadcastToMap(monster.mapId, {
+            type: 'ENTITY_UPDATE',
+            entity: {
+              id: monster.id,
+              type: 'monster' as const,
+              x: monster.x,
+              y: monster.y,
+              hp: monster.hp,
+              maxHp: monster.maxHp,
             },
           } as any);
         }

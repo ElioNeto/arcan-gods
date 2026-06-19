@@ -177,10 +177,9 @@ export class GameplayEngine implements IGameplayEngine {
     return this.collisionSystem?.canMoveTo(_mapId, _x, _y) ?? true;
   }
 
-  isInBounds(_mapId: string, _x: number, _y: number): boolean {
-    if (!this.collisionSystem) return true;
-    // CollisionSystem doesn't have isInBounds directly, but CollisionGrid does
-    return true; // Fallback
+  isInBounds(mapId: string, x: number, y: number): boolean {
+    if (!this.collisionSystem) return false;
+    return this.collisionSystem.canMoveTo(mapId, x, y);
   }
 
   // ─── Tick ───────────────────────────────────────────────────

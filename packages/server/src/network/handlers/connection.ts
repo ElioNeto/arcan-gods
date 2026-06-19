@@ -209,6 +209,24 @@ function handlePlayerAttack(ws: WebSocket, socketData: SocketData, packet: Clien
 
   // Broadcast to all players in the map (including attacker) (#63 fix)
   world.broadcastToMap(player.mapId, damagePacket);
+
+  // Also broadcast ENTITY_UPDATE for the target (HP changed)
+  const targetPlayer = world.getPlayer(result.targetId!);
+  const targetMonster = world.getMonster(result.targetId!);
+  const targetEntity = targetPlayer ?? targetMonster;
+  if (targetEntity) {
+    world.broadcastToMap(player.mapId, {
+      type: 'ENTITY_UPDATE',
+      entity: {
+        id: targetEntity.id,
+        type: targetPlayer ? 'player' as const : 'monster' as const,
+        x: targetEntity.x,
+        y: targetEntity.y,
+        hp: (targetEntity as any).hp,
+        maxHp: (targetEntity as any).maxHp,
+      },
+    } as any);
+  }
 }
 
 function handlePlayerChat(ws: WebSocket, socketData: SocketData, packet: ClientPacket & { type: 'PLAYER_CHAT' }, world: World): void {
