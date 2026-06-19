@@ -2,13 +2,12 @@ import { Container, Graphics, Text, TextStyle, Sprite } from 'pixi.js';
 import type { Texture } from 'pixi.js';
 
 /**
- * Creates visual representations for entities using actual sprites when available,
- * falling back to colored placeholders.
+ * Creates visual representations for entities.
+ * Uses loaded sprite textures when available, falls back to colored shapes.
  */
 export class PlaceholderGraphics {
   private static textureCache: Map<string, Texture> = new Map();
 
-  /** Set the texture cache (populated by AssetManager) */
   static setTextureCache(cache: Map<string, Texture>): void {
     this.textureCache = cache;
   }
@@ -18,17 +17,19 @@ export class PlaceholderGraphics {
     container.x = x;
     container.y = y;
 
-    // Try to use player sprite, fallback to colored rectangle
-    const tex = this.textureCache.get('player_walk') ?? this.textureCache.get('player_placeholder');
+    const tex = this.textureCache.get('player_walk');
     if (tex) {
       const sprite = new Sprite(tex);
-      sprite.anchor.set(0, 1); // bottom-center anchor for tile alignment
-      sprite.scale.set(0.5); // 128x128 → 64x64 (2 tiles tall)
+      sprite.anchor.set(0, 1);
+      sprite.scale.set(0.5);
       container.addChild(sprite);
     } else {
+      // Fallback: blue rectangle (no canvas 2D texture — direct Graphics)
       const body = new Graphics();
       body.rect(0, -32, 32, 32);
       body.fill({ color: 0x4488ff });
+      body.rect(0.5, -31.5, 31, 31);
+      body.stroke({ color: 0xffffff, alpha: 0.2, width: 1 });
       container.addChild(body);
     }
 
@@ -49,17 +50,19 @@ export class PlaceholderGraphics {
     container.x = x;
     container.y = y;
 
-    // Pick a random monster texture based on name hash
     const tex = this.getMonsterTexture(name);
     if (tex) {
       const sprite = new Sprite(tex);
       sprite.anchor.set(0, 1);
-      sprite.scale.set(0.5); // scale to fit tile
+      sprite.scale.set(0.5);
       container.addChild(sprite);
     } else {
+      // Fallback: red rectangle
       const body = new Graphics();
       body.rect(0, -32, 32, 32);
       body.fill({ color: 0xff4444 });
+      body.rect(0.5, -31.5, 31, 31);
+      body.stroke({ color: 0xffffff, alpha: 0.2, width: 1 });
       container.addChild(body);
     }
 
@@ -106,8 +109,8 @@ export class PlaceholderGraphics {
 
   private static getMonsterTexture(name: string): Texture | undefined {
     const hash = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    const textures = ['dog', 'cat', 'bird'];
-    const idx = hash % textures.length;
-    return this.textureCache.get(textures[idx]);
+    const keys = ['monster_dog', 'monster_cat', 'monster_bird'];
+    const idx = hash % keys.length;
+    return this.textureCache.get(keys[idx]);
   }
 }

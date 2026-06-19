@@ -52,14 +52,25 @@ export class Game {
   }
 
   async init(): Promise<void> {
+    // Handle WebGL context loss gracefully
+    const canvas = document.createElement('canvas');
+    canvas.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      console.warn('WebGL context lost — rendering paused');
+    });
+    canvas.addEventListener('webglcontextrestored', () => {
+      console.log('WebGL context restored — rendering resumed');
+    });
+
     // Initialize PixiJS
     await this.app.init({
+      canvas,
       resizeTo: window,
       backgroundColor: 0x0a0a1a,
       antialias: true,
+      powerPreference: 'high-performance',
     });
 
-    const canvas = this.app.canvas as HTMLCanvasElement;
     document.getElementById('app')?.appendChild(canvas);
 
     // Add containers to stage
@@ -306,11 +317,14 @@ export class Game {
       if (input.clicked) {
         // Convert screen coordinates to world coordinates
         const worldPos = this.camera.screenToWorld(input.clickX, input.clickY);
+        const destX = Math.round(worldPos.x);
+        const destY = Math.round(worldPos.y);
+        console.debug(`[Move] Click (${input.clickX},${input.clickY}) → World (${worldPos.x.toFixed(1)},${worldPos.y.toFixed(1)}) → Dest (${destX},${destY})`);
         // Send movement intent to server
         this.networkManager.send({
           type: 'PLAYER_MOVE',
-          destX: Math.round(worldPos.x),
-          destY: Math.round(worldPos.y),
+          destX,
+          destY,
         });
       }
 
