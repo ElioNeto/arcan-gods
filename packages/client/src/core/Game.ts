@@ -1,4 +1,5 @@
 import { Application, Container } from 'pixi.js';
+import type { IPlayer } from '@arcan-gods/shared';
 import { NetworkManager } from './NetworkManager.js';
 import { InputManager } from './InputManager.js';
 import { Camera } from './Camera.js';
@@ -7,6 +8,8 @@ import { TilemapRenderer } from '../maps/TilemapRenderer.js';
 import { MenuScreen } from '../ui/MenuScreen.js';
 import { PlaceholderGraphics } from '../ui/PlaceholderGraphics.js';
 import { MovementInterpolator } from '../systems/MovementInterpolator.js';
+import { HUD } from '../ui/hud/HUD.js';
+import { CombatFeedbackManager } from '../ui/combat/CombatFeedbackManager.js';
 
 export type GameState = 'loading' | 'menu' | 'world';
 
@@ -24,6 +27,18 @@ export class Game {
   private state: GameState = 'loading';
   private playerEntities: Map<string, Container> = new Map();
   private movementInterpolator: MovementInterpolator = new MovementInterpolator();
+
+  /** HUD overlay (HP/MP/XP bars) */
+  private hud: HUD | null = null;
+
+  /** Combat feedback (damage numbers, entity health bars) */
+  private combatFeedbackManager: CombatFeedbackManager | null = null;
+
+  /** ID of the local player, for filtering events */
+  private localPlayerId: string | null = null;
+
+  /** Cached full player data so we can update HUD from partial updates */
+  private localPlayerData: IPlayer | null = null;
 
   constructor() {
     this.app = new Application();
@@ -60,6 +75,7 @@ export class Game {
       const width = this.app.screen.width;
       const height = this.app.screen.height;
       this.camera.setScreenSize(width, height);
+      this.hud?.resize(width, height);
     });
 
     // Set up network event handlers
@@ -82,11 +98,15 @@ export class Game {
     });
 
     this.networkManager.on('ENTITY_UPDATE', (packet: any) => {
-      this.updateEntity(packet.entity);
+      this.onEntityUpdate(packet.entity);
     });
 
     this.networkManager.on('ENTITY_REMOVE', (packet: any) => {
       this.removeEntity(packet.id);
+    });
+
+    this.networkManager.on('ENTITY_DAMAGED', (packet: any) => {
+      this.onEntityDamaged(packet);
     });
 
     this.networkManager.on('PLAYER_MOVED', (packet: any) => {
@@ -112,6 +132,52 @@ export class Game {
     });
   }
 
+  /**
+   * Handle ENTITY_UPDATE — updates entity positions and HUD for the local player.
+   */
+  private onEntityUpdate(entity: any): void {
+    // If this is the local player, update the HUD
+    if (entity.id === this.localPlayerId && this.localPlayerData) {
+      // Merge new data into cached player data
+      Object.assign(this.localPlayerData, entity);
+      this.hud?.update(this.localPlayerData);
+    }
+
+    // Update entity container and combat feedback position
+    this.updateEntity(entity);
+    if (this.combatFeedbackManager) {
+      this.combatFeedbackManager.updateEntityPosition(entity.id, entity.x, entity.y);
+    }
+  }
+
+  /**
+   * Handle ENTITY_DAMAGED — update HUD if local player is hit, or spawn
+   * combat feedback for other entities (monsters).
+   */
+  private onEntityDamaged(packet: any): void {
+    // If local player was damaged, update HUD
+    if (packet.targetId === this.localPlayerId && this.localPlayerData) {
+      this.localPlayerData.hp = packet.targetHp;
+      this.localPlayerData.maxHp = packet.targetMaxHp;
+      this.hud?.update(this.localPlayerData);
+    }
+
+    // Look up entity position for combat feedback
+    const entityContainer = this.playerEntities.get(packet.targetId);
+    const x = entityContainer?.x ?? packet.x ?? 0;
+    const y = entityContainer?.y ?? packet.y ?? 0;
+
+    this.combatFeedbackManager?.onEntityDamaged({
+      targetId: packet.targetId,
+      damage: packet.damage,
+      isCritical: packet.isCritical ?? false,
+      targetHp: packet.targetHp,
+      targetMaxHp: packet.targetMaxHp,
+      x,
+      y,
+    });
+  }
+
   private showMenu(): void {
     this.state = 'menu';
     this.menuScreen = new MenuScreen(this.networkManager);
@@ -128,7 +194,7 @@ export class Game {
     });
   }
 
-  private enterWorld(playerData: any): void {
+  private enterWorld(playerData: IPlayer): void {
     this.state = 'world';
 
     // Remove menu
@@ -136,6 +202,10 @@ export class Game {
       this.menuScreen.destroy();
       this.menuScreen = null;
     }
+
+    // Store local player data
+    this.localPlayerId = playerData.id;
+    this.localPlayerData = playerData;
 
     // Request map data for the current map
     this.networkManager.send({ type: 'REQUEST_MAP_DATA' });
@@ -149,6 +219,14 @@ export class Game {
     this.worldContainer.addChild(playerContainer);
     this.playerEntities.set(playerData.id, playerContainer);
 
+    // Initialize HUD (placed in uiContainer, on top of world)
+    this.hud = new HUD();
+    this.uiContainer.addChild(this.hud.getContainer());
+    this.hud.update(playerData);
+
+    // Initialize combat feedback (placed in worldContainer for world-space position)
+    this.combatFeedbackManager = new CombatFeedbackManager(this.worldContainer);
+
     // Camera follows player
     this.camera.follow(playerData);
     this.camera.snapToTarget();
@@ -159,6 +237,11 @@ export class Game {
     for (const entity of packet.entities) {
       this.updateEntity(entity);
     }
+
+    // Update HUD from cached player data if available
+    if (this.localPlayerData) {
+      this.hud?.update(this.localPlayerData);
+    }
   }
 
   private updateEntity(entity: any): void {
@@ -168,6 +251,20 @@ export class Game {
     if (existing) {
       existing.x = entity.x;
       existing.y = entity.y;
+
+      // Update combat feedback health bar position and HP
+      this.combatFeedbackManager?.updateEntityPosition(entity.id, entity.x, entity.y);
+      if (entity.hp !== undefined && entity.maxHp !== undefined) {
+        this.combatFeedbackManager?.onEntityDamaged({
+          targetId: entity.id,
+          damage: 0,
+          isCritical: false,
+          targetHp: entity.hp,
+          targetMaxHp: entity.maxHp,
+          x: entity.x,
+          y: entity.y,
+        });
+      }
     } else if (entity.type === 'monster') {
       const container = PlaceholderGraphics.createMonster(
         entity.x,
@@ -185,6 +282,9 @@ export class Game {
       this.worldContainer.removeChild(container);
       this.playerEntities.delete(id);
     }
+
+    // Remove combat feedback (health bar) for this entity
+    this.combatFeedbackManager?.removeEntity(id);
   }
 
   private updateEntityPosition(id: string, x: number, y: number): void {
@@ -206,8 +306,13 @@ export class Game {
         if (pos) {
           container.x = pos.x;
           container.y = pos.y;
+          // Update combat feedback positions to follow interpolated movement
+          this.combatFeedbackManager?.updateEntityPosition(id, pos.x, pos.y);
         }
       }
+
+      // Update combat feedback animations (damage numbers, etc.)
+      this.combatFeedbackManager?.update(deltaSec);
 
       this.camera.update();
     }
